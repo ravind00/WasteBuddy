@@ -8,4 +8,4 @@
 // const BACKEND_URL = "https://your-backend.onrender.com";
 // ===========================================
 
-const BACKEND_URL = "http://" + window.location.hostname + ":8080";
+const BACKEND_URL = "https://wastebuddy.onrender.com";
