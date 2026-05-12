@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waste Buddy - Home</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+    <div class="mobile-frame dashboard-bg">
+        <div class="dashboard-header">
+            <h2>Hello,<br><span id="user-name">User</span> ✓</h2>
+            <i class="fa-regular fa-bell bell-icon"></i>
+        </div>
+        <div class="form-container">
+            <div class="scan-card">
+                <h3>Scan Waste</h3>
+                <p>Identify waste type</p>
+                <label for="camera-input" style="cursor:pointer;display:block">
+                    <div class="camera-btn"><i class="fa-solid fa-camera"></i></div>
+                    <p style="margin-bottom:0">Tap to Scan<br><span style="font-size:11px">or upload from gallery</span></p>
+                </label>
+                <input type="file" id="camera-input" accept="image/*" capture="environment" style="display:none">
+            </div>
+            <div class="points-card">
+                <div class="points-info">
+                    <h4>Your Points</h4>
+                    <p><span id="points-display">0</span> <span>PTS</span></p>
+                </div>
+                <div class="star-icon"><i class="fa-solid fa-star"></i></div>
+            </div>
+            <div class="scan-card" style="text-align:left;margin-bottom:100px">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+                    <h4 style="color:var(--text);font-size:15px;font-weight:600;margin:0">Nearest Bins</h4>
+                    <a href="bin_location.html" style="color:#2563eb;font-size:13px;text-decoration:none;font-weight:600">View All</a>
+                </div>
+                <div id="waste-map" style="height:180px;width:100%;border-radius:12px;z-index:1;border:1px solid var(--border)"></div>
+            </div>
+        </div>
+        <div class="bottom-nav">
+            <a href="home.html" class="nav-item active"><i class="fa-solid fa-house"></i><span>Home</span></a>
+            <a href="history.html" class="nav-item"><i class="fa-solid fa-clock-rotate-left"></i><span>Scan History</span></a>
+            <a href="bin_location.html" class="nav-item"><i class="fa-solid fa-location-dot"></i><span>Bin Location</span></a>
+            <a href="rewards.html" class="nav-item"><i class="fa-solid fa-gift"></i><span>Rewards</span></a>
+            <a href="profile.html" class="nav-item"><i class="fa-solid fa-user"></i><span>Profile</span></a>
+        </div>
+    </div>
+
+    <div id="loading-overlay" class="hidden">
+        <div class="spinner"></div>
+        <h3 style="color:#fff">AI Scanning Waste...</h3>
+    </div>
+
+<script src="js/config.js"></script>
+<script>
+// Display user info
+document.addEventListener("DOMContentLoaded",function(){
+    const n=localStorage.getItem('user_full_name');
+    if(n&&n!=='undefined')document.getElementById('user-name').textContent=n;
+    const p=localStorage.getItem('user_points');
+    if(p)document.getElementById('points-display').textContent=p;
+});
+
+// Map
+var map=L.map('waste-map').setView([23.2599,77.4126],13);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
+function mkIcon(c){return L.divIcon({html:`<i class="fa-solid fa-trash-can" style="color:${c};font-size:20px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.4))"></i>`,className:'',iconSize:[20,20],iconAnchor:[10,20],popupAnchor:[0,-20]})}
+var icons={wet:mkIcon('#16a34a'),dry:mkIcon('#2563eb'),ewaste:mkIcon('#dc2626')};
+var types=['wet','dry','ewaste'];
+for(let i=0;i<20;i++){
+    let lat=23.22+Math.random()*.08,lng=77.37+Math.random()*.08,t=types[Math.floor(Math.random()*3)];
+    L.marker([lat,lng],{icon:icons[t]}).addTo(map).bindPopup(`<b>${t.charAt(0).toUpperCase()+t.slice(1)} Waste Bin</b><br><span style='color:#64748b;font-size:12px'>Smart Bin #${i+1}</span>`);
+}
+
+// Scan waste
+document.getElementById('camera-input').addEventListener('change',function(e){
+    const file=e.target.files[0];
+    if(!file)return;
+    document.getElementById('loading-overlay').classList.remove('hidden');
+    const fd=new FormData();
+    fd.append('image',file);
+    fd.append('login_id',localStorage.getItem('user_login_id')||'');
+    fetch(`${BACKEND_URL}/analyze-waste`,{method:'POST',body:fd})
+    .then(r=>r.json())
+    .then(data=>{
+        document.getElementById('loading-overlay').classList.add('hidden');
+        // Store scan result and go to scan_result page
+        localStorage.setItem('scan_result',JSON.stringify(data));
+        window.location.href='scan_result.html';
+    })
+    .catch(err=>{
+        alert("Connection failed! Check your network.");
+        document.getElementById('loading-overlay').classList.add('hidden');
+    });
+});
+
+// Refresh points
+async function refreshPoints(){
+    const id=localStorage.getItem('user_login_id');if(!id)return;
+    try{
+        const r=await fetch(`${BACKEND_URL}/get_user_data?login_id=${id}`);
+        const d=await r.json();
+        if(d.success){
+            document.getElementById('points-display').textContent=d.points;
+            localStorage.setItem('user_points',d.points);
+            localStorage.setItem('user_total_scans',d.total_scans||0);
+            localStorage.setItem('user_verified_count',d.verified_count||0);
+        }
+    }catch(e){}
+}
+setInterval(refreshPoints,5000);
+window.addEventListener('load',refreshPoints);
+</script>
+</body>
+</html>

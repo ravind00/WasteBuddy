@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Waste Buddy — Admin Dashboard</title>
+  <meta name="description" content="AI-Powered Smart Waste Management Admin Dashboard">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- ===== LOGIN SCREEN ===== -->
+  <div id="loginScreen" class="login-screen">
+    <div class="login-card">
+      <div class="login-logo">
+        <div class="logo-icon"><i class="fas fa-recycle"></i></div>
+        <h1>WASTE BUDDY</h1>
+        <p>AI-Powered Smart Waste Management</p>
+      </div>
+      <div class="login-divider">
+        <span>Welcome Back!</span>
+        <small>Sign in to continue</small>
+      </div>
+      <form id="loginForm">
+        <div class="form-group">
+          <i class="fas fa-envelope"></i>
+          <input type="email" id="loginEmail" placeholder="Email" required>
+        </div>
+        <div class="form-group">
+          <i class="fas fa-lock"></i>
+          <input type="password" id="loginPassword" placeholder="Password" required>
+        </div>
+        <div class="forgot-link">
+          <a href="#" id="openForgotPwd">Forgot Password?</a>
+        </div>
+        <button type="submit" class="btn-primary full-width">
+          <i class="fas fa-sign-in-alt"></i> Login
+        </button>
+        <p class="secure-note"><i class="fas fa-shield-alt"></i> Secure Admin Access</p>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== FORGOT PASSWORD MODAL ===== -->
+  <div id="forgotModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <button class="modal-close" id="closeForgotModal"><i class="fas fa-arrow-left"></i></button>
+      <div class="modal-icon green"><i class="fas fa-key"></i></div>
+      <h2>Forgot Password?</h2>
+      <p>Enter your registered email address and we will send you reset instructions.</p>
+      <div class="form-group mt-16">
+        <i class="fas fa-envelope"></i>
+        <input type="email" id="forgotEmail" placeholder="Email">
+      </div>
+      <button class="btn-primary full-width mt-16" id="sendResetBtn">Send Reset Link</button>
+      <a href="#" class="back-link" id="backToLogin">Back to Login</a>
+    </div>
+  </div>
+
+  <!-- ===== MAIN APP ===== -->
+  <div id="mainApp" class="app-container hidden">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-icon-sm"><i class="fas fa-recycle"></i></div>
+        <div>
+          <h2>WASTE BUDDY</h2>
+          <span>Admin Dashboard</span>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <ul>
+          <li class="nav-item active" data-page="dashboard" id="nav-dashboard">
+            <i class="fas fa-th-large"></i><span>Dashboard</span>
+          </li>
+          <li class="nav-item" data-page="bins" id="nav-bins">
+            <i class="fas fa-trash-alt"></i><span>Bins</span>
+          </li>
+          <li class="nav-item" data-page="collections" id="nav-collections">
+            <i class="fas fa-truck"></i><span>Collections</span>
+          </li>
+          <li class="nav-item" data-page="routes" id="nav-routes">
+            <i class="fas fa-route"></i><span>Routes</span>
+          </li>
+          <li class="nav-item" data-page="alerts" id="nav-alerts">
+            <i class="fas fa-bell"></i><span>Alerts</span>
+            <span class="badge" id="alertBadge">3</span>
+          </li>
+          <li class="nav-item" data-page="users" id="nav-users">
+            <i class="fas fa-users"></i><span>Users</span>
+          </li>
+          <li class="nav-item" data-page="reports" id="nav-reports">
+            <i class="fas fa-chart-line"></i><span>Reports</span>
+          </li>
+          <li class="nav-item" data-page="settings" id="nav-settings">
+            <i class="fas fa-cog"></i><span>Settings</span>
+          </li>
+        </ul>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="sidebar-profile" id="openProfileBtn">
+          <div class="avatar-sm"><i class="fas fa-user"></i></div>
+          <div>
+            <p class="profile-name">Admin123</p>
+            <span class="profile-role">Administrator</span>
+          </div>
+        </div>
+        <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i></button>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+      <!-- ===== DASHBOARD PAGE ===== -->
+      <section id="dashboard" class="page active-page">
+        <div class="page-header">
+          <div>
+            <h1>Welcome back, Admin123 👋</h1>
+            <p>Smart Waste Management System</p>
+          </div>
+          <div class="header-right">
+            <span class="datetime" id="datetimeDisplay"></span>
+            <button class="icon-btn"><i class="fas fa-bell"></i></button>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon blue"><i class="fas fa-trash-alt"></i></div>
+            <div>
+              <p>Total Bins</p>
+              <h2 id="statTotalBins">12</h2>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon red"><i class="fas fa-exclamation-triangle"></i></div>
+            <div>
+              <p>Active Alerts</p>
+              <h2 id="statActiveAlerts">3</h2>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon green"><i class="fas fa-truck"></i></div>
+            <div>
+              <p>Total Collections</p>
+              <h2 id="statTotalCollections">45</h2>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon yellow"><i class="fas fa-battery-three-quarters"></i></div>
+            <div>
+              <p>Avg. Fill Level</p>
+              <h2 id="statAvgFill">62%</h2>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-grid">
+          <div class="card-box">
+            <h3 class="box-title">Bin Status</h3>
+            <div class="bins-mini-grid" id="dashboardBinGrid"></div>
+          </div>
+          <div class="card-box">
+            <h3 class="box-title">Recent Alerts</h3>
+            <div id="dashboardAlerts"></div>
+            <a href="#" class="view-all-link" data-page="alerts">View All Alerts →</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== BINS PAGE ===== -->
+      <section id="bins" class="page">
+        <div class="page-header">
+          <h1>Bins Management</h1>
+          <button class="btn-primary" id="openAddBinBtn"><i class="fas fa-plus"></i> Add New Bin</button>
+        </div>
+        <div class="filter-bar">
+          <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="binSearch" placeholder="Search bins...">
+          </div>
+          <select id="binStatusFilter" class="select-input">
+            <option value="all">All Status</option>
+            <option value="critical">Critical</option>
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>Bin ID</th>
+                <th>Location</th>
+                <th>Fill Level</th>
+                <th>Status</th>
+                <th>Last Updated</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="binsTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ===== COLLECTIONS PAGE ===== -->
+      <section id="collections" class="page">
+        <div class="page-header">
+          <h1>Collections</h1>
+          <button class="btn-primary" id="openNewCollectionBtn"><i class="fas fa-plus"></i> New Collection</button>
+        </div>
+        <div class="filter-bar">
+          <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="collectionSearch" placeholder="Search collection...">
+          </div>
+          <select id="collectionStatusFilter" class="select-input">
+            <option value="all">All</option>
+            <option value="completed">Completed</option>
+            <option value="in-progress">In Progress</option>
+            <option value="pending">Pending</option>
+          </select>
+        </div>
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>Collection ID</th>
+                <th>Route</th>
+                <th>Driver</th>
+                <th>Status</th>
+                <th>Time</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="collectionsTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ===== ROUTES PAGE ===== -->
+      <section id="routes" class="page">
+        <div class="page-header">
+          <h1>Route Optimization</h1>
+          <select id="driverSelect" class="select-input">
+            <option value="1">Driver 1</option>
+            <option value="2">Driver 2</option>
+            <option value="3">Driver 3</option>
+          </select>
+        </div>
+        <div class="route-container">
+          <div class="card-box">
+            <div class="route-header">
+              <h3>Recommended Route</h3>
+              <span class="driver-badge" id="routeDriverLabel">Driver 1</span>
+            </div>
+            <div class="map-canvas" id="routeMapCanvas">
+              <div class="map-node" id="node1" style="top:30%;left:8%">1</div>
+              <div class="map-node" id="node2" style="top:60%;left:25%">2</div>
+              <div class="map-node" id="node3" style="top:20%;left:50%">3</div>
+              <div class="map-node active-node" id="node4" style="top:55%;left:70%">4</div>
+              <div class="map-node truck-node" id="nodeTruck" style="top:70%;left:88%"><i class="fas fa-truck"></i>
+              </div>
+            </div>
+            <div class="route-sequence" id="routeSequence"></div>
+            <div class="route-stats">
+              <div class="route-stat">
+                <p>Total Distance</p>
+                <h3 id="routeDist">4.2 km</h3>
+              </div>
+              <div class="route-stat yellow">
+                <p>Est. Time</p>
+                <h3 id="routeTime">28 min</h3>
+              </div>
+              <div class="route-stat green">
+                <p>Fuel Saved</p>
+                <h3 id="routeFuel">20%</h3>
+              </div>
+            </div>
+            <button class="btn-primary full-width mt-16" id="startRouteBtn"><i class="fas fa-play"></i> Start
+              Route</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== ALERTS PAGE ===== -->
+      <section id="alerts" class="page">
+        <div class="page-header">
+          <h1>Alerts</h1>
+        </div>
+        <div class="tab-bar">
+          <button class="tab active-tab" data-filter="all">All</button>
+          <button class="tab" data-filter="critical">Critical</button>
+          <button class="tab" data-filter="warning">Warning</button>
+          <button class="tab" data-filter="info">Info</button>
+        </div>
+        <div id="alertsList"></div>
+      </section>
+
+      <!-- ===== USERS PAGE ===== -->
+      <section id="users" class="page">
+        <div class="page-header">
+          <h1>Users</h1>
+          <button class="btn-primary" id="openAddUserBtn"><i class="fas fa-plus"></i> Add User</button>
+        </div>
+        <div class="filter-bar">
+          <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="userSearch" placeholder="Search users...">
+          </div>
+        </div>
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Role</th>
+                <th>Phone</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ===== REPORTS PAGE ===== -->
+      <section id="reports" class="page">
+        <div class="page-header">
+          <div>
+            <h1>Reports</h1>
+            <p>05 May 2025 – 07 May 2025</p>
+          </div>
+          <button class="btn-outline" id="exportReportBtn"><i class="fas fa-download"></i> Export</button>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon green"><i class="fas fa-truck"></i></div>
+            <div>
+              <p>Total Collections</p>
+              <h2>45</h2>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon blue"><i class="fas fa-road"></i></div>
+            <div>
+              <p>Total Distance</p>
+              <h2>189.6 km</h2>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon yellow"><i class="fas fa-gas-pump"></i></div>
+            <div>
+              <p>Fuel Saved</p>
+              <h2>18.7 L</h2>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon red"><i class="fas fa-tachometer-alt"></i></div>
+            <div>
+              <p>Efficiency</p>
+              <h2>20%</h2>
+            </div>
+          </div>
+        </div>
+        <div class="card-box">
+          <h3 class="box-title">Collections Over Time</h3>
+          <canvas id="collectionsChart" height="100"></canvas>
+        </div>
+      </section>
+
+      <!-- ===== SETTINGS PAGE ===== -->
+      <section id="settings" class="page">
+        <div class="page-header">
+          <h1>Settings</h1>
+        </div>
+        <div class="settings-layout">
+          <div class="settings-sidebar">
+            <ul>
+              <li class="settings-nav active-settings" data-settings="general"><i class="fas fa-sliders-h"></i> General
+              </li>
+              <li class="settings-nav" data-settings="notifications"><i class="fas fa-bell"></i> Notifications</li>
+              <li class="settings-nav" data-settings="system"><i class="fas fa-server"></i> System</li>
+              <li class="settings-nav" data-settings="security"><i class="fas fa-shield-alt"></i> Security</li>
+              <li class="settings-nav" data-settings="backup"><i class="fas fa-database"></i> Backup</li>
+            </ul>
+          </div>
+          <div class="settings-body">
+            <div id="settings-general" class="settings-panel active-panel">
+              <h3>General Settings</h3>
+              <div class="form-row">
+                <label>City Name</label>
+                <input type="text" class="text-input" value="Indore">
+              </div>
+              <div class="form-row">
+                <label>Time Zone</label>
+                <select class="select-input">
+                  <option>(GMT+05:30) Asia/Kolkata</option>
+                  <option>(GMT+00:00) UTC</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <label>Date Format</label>
+                <select class="select-input">
+                  <option>DD-MM-YYYY</option>
+                  <option>MM-DD-YYYY</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <label>Language</label>
+                <select class="select-input">
+                  <option>English</option>
+                  <option>Hindi</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <label>Admin Phone</label>
+                <input type="text" class="text-input" value="9999999999">
+              </div>
+              <button class="btn-primary mt-16" id="saveSettingsBtn">Save Changes</button>
+            </div>
+            <div id="settings-notifications" class="settings-panel">
+              <h3>Notification Settings</h3>
+              <div class="toggle-row">
+                <span>Email Alerts</span>
+                <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+              </div>
+              <div class="toggle-row">
+                <span>SMS Alerts</span>
+                <label class="toggle"><input type="checkbox"><span class="slider"></span></label>
+              </div>
+              <div class="toggle-row">
+                <span>Push Notifications</span>
+                <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+              </div>
+              <button class="btn-primary mt-16">Save Changes</button>
+            </div>
+            <div id="settings-system" class="settings-panel">
+              <h3>System Settings</h3>
+              <div class="form-row"><label>System Version</label><input type="text" class="text-input" value="v2.4.1"
+                  readonly></div>
+              <div class="form-row"><label>Last Backup</label><input type="text" class="text-input"
+                  value="12 May 2026, 06:00 AM" readonly></div>
+              <button class="btn-primary mt-16">Save Changes</button>
+            </div>
+            <div id="settings-security" class="settings-panel">
+              <h3>Security Settings</h3>
+              <div class="toggle-row"><span>Two-Factor Authentication</span><label class="toggle"><input type="checkbox"
+                    checked><span class="slider"></span></label></div>
+              <div class="toggle-row"><span>Session Timeout (30 min)</span><label class="toggle"><input type="checkbox"
+                    checked><span class="slider"></span></label></div>
+              <button class="btn-primary mt-16">Save Changes</button>
+            </div>
+            <div id="settings-backup" class="settings-panel">
+              <h3>Backup Settings</h3>
+              <div class="toggle-row"><span>Auto Backup (Daily)</span><label class="toggle"><input type="checkbox"
+                    checked><span class="slider"></span></label></div>
+              <button class="btn-primary mt-16">Backup Now</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ===== BIN DETAILS MODAL ===== -->
+  <div id="binDetailsModal" class="modal-overlay hidden">
+    <div class="modal-card wide">
+      <div class="modal-topbar">
+        <button class="modal-close icon-btn" id="closeBinDetails"><i class="fas fa-arrow-left"></i></button>
+        <h2>Bin Details</h2>
+      </div>
+      <div class="bin-detail-body">
+        <div class="bin-detail-header">
+          <div class="bin-icon-large"><i class="fas fa-trash-alt"></i></div>
+          <div>
+            <h2 id="detailBinId">Bin #2</h2>
+            <span class="status-badge red" id="detailStatus">Full</span>
+          </div>
+        </div>
+        <p class="fill-label">Fill Level</p>
+        <div class="fill-bar-large">
+          <div id="detailFillBar" style="width:85%"></div>
+        </div>
+        <p id="detailFillPct" class="fill-pct">85%</p>
+        <div class="detail-info-grid">
+          <div><span>Last Updated</span>
+            <p id="detailLastUpdated">2 minutes ago</p>
+          </div>
+          <div><span>Location</span>
+            <p id="detailLocation">MG Road, Indore</p>
+          </div>
+        </div>
+        <div class="alert-banner" id="detailAlertBanner">
+          <i class="fas fa-exclamation-triangle"></i>
+          <div>
+            <strong>Alert: Bin is 80%+ full!</strong>
+            <p>Immediate action required.</p>
+          </div>
+        </div>
+        <button class="btn-primary full-width mt-16" id="detailMarkCollected">
+          <i class="fas fa-check-circle"></i> Mark as Collected
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ADD / EDIT BIN MODAL ===== -->
+  <div id="addBinModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-topbar">
+        <button class="modal-close icon-btn" id="closeAddBin"><i class="fas fa-arrow-left"></i></button>
+        <h2 id="addBinTitle">Add New Bin</h2>
+      </div>
+      <form id="addBinForm">
+        <div class="form-row">
+          <label>Bin ID</label>
+          <input type="text" class="text-input" id="formBinId" placeholder="e.g. Bin 7" required>
+        </div>
+        <div class="form-row">
+          <label>Location</label>
+          <input type="text" class="text-input" id="formBinLocation" placeholder="Enter location" required>
+        </div>
+        <div class="form-row">
+          <label>Status</label>
+          <select class="select-input" id="formBinStatus">
+            <option>Active</option>
+            <option>Inactive</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-primary full-width mt-16">Save Bin</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== ADD USER MODAL ===== -->
+  <div id="addUserModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-topbar">
+        <button class="modal-close icon-btn" id="closeAddUser"><i class="fas fa-arrow-left"></i></button>
+        <h2 id="addUserTitle">Add New User</h2>
+      </div>
+      <form id="addUserForm">
+        <div class="upload-avatar-area">
+          <div class="avatar-lg"><i class="fas fa-user"></i></div>
+          <label class="btn-outline sm">Upload Photo</label>
+          <input type="file" class="hidden" accept="image/*">
+        </div>
+        <div class="form-row">
+          <label>Name</label>
+          <input type="text" class="text-input" id="formUserName" placeholder="Enter name" required>
+        </div>
+        <div class="form-row">
+          <label>Role</label>
+          <select class="select-input" id="formUserRole">
+            <option>Admin</option>
+            <option>Driver</option>
+            <option>Worker</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Phone</label>
+          <input type="text" class="text-input" id="formUserPhone" placeholder="Enter phone number">
+        </div>
+        <div class="form-row">
+          <label>Status</label>
+          <select class="select-input" id="formUserStatus">
+            <option>Active</option>
+            <option>Inactive</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-primary full-width mt-16">Save User</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== PROFILE MODAL ===== -->
+  <div id="profileModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-topbar">
+        <button class="modal-close icon-btn" id="closeProfile"><i class="fas fa-times"></i></button>
+        <h2>Profile</h2>
+      </div>
+      <div class="profile-body">
+        <div class="profile-avatar-area">
+          <div class="avatar-xl"><i class="fas fa-user-tie"></i></div>
+          <span class="avatar-edit"><i class="fas fa-camera"></i></span>
+        </div>
+        <h2 class="profile-name-lg">Admin123</h2>
+        <p class="profile-role-lg">Administrator</p>
+        <div class="profile-info">
+          <div class="profile-info-row">
+            <i class="fas fa-envelope"></i>
+            <span>admin123@wastebuddy.com</span>
+          </div>
+          <div class="profile-info-row">
+            <i class="fas fa-phone"></i>
+            <span>9999999999</span>
+          </div>
+          <div class="profile-info-row">
+            <i class="fas fa-calendar"></i>
+            <span>Joined On: 01 Jan 2025</span>
+          </div>
+        </div>
+        <button class="btn-primary full-width mt-16" id="editProfileBtn">Edit Profile</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TOAST ===== -->
+  <div id="toast" class="toast hidden"></div>
+
+  <!-- ===== FOOTER FEATURE BAR ===== -->
+  <div class="feature-bar hidden" id="featureBar">
+    <div class="feature-item">
+      <i class="fas fa-robot"></i>
+      <div><strong>AI Waste Classification</strong><small>Smart &amp; Accurate</small></div>
+    </div>
+    <div class="feature-item">
+      <i class="fas fa-satellite-dish"></i>
+      <div><strong>Real-time Monitoring</strong><small>Live Bin Status</small></div>
+    </div>
+    <div class="feature-item">
+      <i class="fas fa-truck"></i>
+      <div><strong>Optimized Collection</strong><small>Save Time &amp; Fuel</small></div>
+    </div>
+    <div class="feature-item">
+      <i class="fas fa-leaf"></i>
+      <div><strong>Clean &amp; Green Future</strong><small>Better Tomorrow</small></div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>

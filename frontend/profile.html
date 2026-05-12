@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waste Buddy - Profile</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="mobile-frame profile-page">
+        <div class="profile-hero">
+            <div class="profile-avatar"><i class="fa-solid fa-user"></i></div>
+            <h2 id="prof-name">User</h2>
+            <div class="badge">Eco Saviour <i class="fa-solid fa-circle-check"></i></div>
+        </div>
+        <div class="stats-row">
+            <div class="stat-item">
+                <div class="num" id="stat-pts">0</div>
+                <div class="label">Total Points</div>
+            </div>
+            <div class="stat-item">
+                <div class="num" id="stat-scans">0</div>
+                <div class="label">Total Scans</div>
+            </div>
+            <div class="stat-item">
+                <div class="num" id="stat-verified">0</div>
+                <div class="label">Verified</div>
+            </div>
+        </div>
+        <div class="profile-menu">
+            <a class="menu-item" href="#" onclick="editProfile();return false">
+                <div class="menu-left"><i class="fa-solid fa-pen-to-square"></i><span>Edit Profile</span></div>
+                <i class="fa-solid fa-chevron-right arrow"></i>
+            </a>
+            <a class="menu-item" href="rewards.html">
+                <div class="menu-left"><i class="fa-solid fa-chart-line"></i><span>My Stats</span></div>
+                <i class="fa-solid fa-chevron-right arrow"></i>
+            </a>
+            <a class="menu-item" href="#" onclick="showAchievements();return false">
+                <div class="menu-left"><i class="fa-solid fa-trophy"></i><span>Achievements</span></div>
+                <i class="fa-solid fa-chevron-right arrow"></i>
+            </a>
+            <a class="menu-item" href="#" onclick="showSettings();return false">
+                <div class="menu-left"><i class="fa-solid fa-gear"></i><span>Settings</span></div>
+                <i class="fa-solid fa-chevron-right arrow"></i>
+            </a>
+            <a class="menu-item" href="#" onclick="showHelp();return false">
+                <div class="menu-left"><i class="fa-solid fa-circle-question"></i><span>Help & Support</span></div>
+                <i class="fa-solid fa-chevron-right arrow"></i>
+            </a>
+            <a class="menu-item danger" href="#" onclick="logout();return false">
+                <div class="menu-left"><i class="fa-solid fa-right-from-bracket"></i><span>Logout</span></div>
+                <i class="fa-solid fa-chevron-right arrow" style="color:#dc2626"></i>
+            </a>
+        </div>
+        <div class="bottom-nav">
+            <a href="home.html" class="nav-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
+            <a href="history.html" class="nav-item"><i class="fa-solid fa-clock-rotate-left"></i><span>Scan
+                    History</span></a>
+            <a href="bin_location.html" class="nav-item"><i class="fa-solid fa-location-dot"></i><span>Bin
+                    Location</span></a>
+            <a href="rewards.html" class="nav-item"><i class="fa-solid fa-gift"></i><span>Rewards</span></a>
+            <a href="profile.html" class="nav-item active"><i class="fa-solid fa-user"></i><span>Profile</span></a>
+        </div>
+    </div>
+
+    <!-- Modal Overlay -->
+    <div id="modal-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);z-index:999;display:none;justify-content:center;align-items:center;backdrop-filter:blur(4px)">
+        <div id="modal-box" style="background:#fff;border-radius:20px;width:90%;max-width:360px;max-height:80vh;overflow-y:auto;padding:28px 22px;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:popIn .3s ease"></div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script>
+        function openModal(html){
+            document.getElementById('modal-box').innerHTML=html;
+            const m=document.getElementById('modal-overlay');
+            m.style.display='flex';
+            m.onclick=function(e){if(e.target===m)closeModal()};
+        }
+        function closeModal(){document.getElementById('modal-overlay').style.display='none'}
+
+        async function loadProfile() {
+            const id = localStorage.getItem('user_login_id');
+            if (!id) { window.location.href = 'index.html'; return }
+            try {
+                const r = await fetch(`${BACKEND_URL}/get_profile?login_id=${id}`);
+                const d = await r.json();
+                if (d.success) {
+                    document.getElementById('prof-name').textContent = d.name || 'User';
+                    document.getElementById('stat-pts').textContent = d.points || 0;
+                    document.getElementById('stat-scans').textContent = d.total_scans || 0;
+                    document.getElementById('stat-verified').textContent = d.verified_count || 0;
+                    localStorage.setItem('user_points', d.points);
+                    localStorage.setItem('user_full_name', d.name);
+                    localStorage.setItem('user_total_scans', d.total_scans);
+                    localStorage.setItem('user_verified_count', d.verified_count);
+                }
+            } catch (e) {
+                document.getElementById('prof-name').textContent = localStorage.getItem('user_full_name') || 'User';
+                document.getElementById('stat-pts').textContent = localStorage.getItem('user_points') || 0;
+                document.getElementById('stat-scans').textContent = localStorage.getItem('user_total_scans') || 0;
+                document.getElementById('stat-verified').textContent = localStorage.getItem('user_verified_count') || 0;
+            }
+        }
+
+        async function editProfile() {
+            const newName = prompt("Enter new name:", localStorage.getItem('user_full_name') || '');
+            if (!newName) return;
+            const id = localStorage.getItem('user_login_id');
+            try {
+                const r = await fetch(`${BACKEND_URL}/update_profile`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ login_id: id, name: newName }) });
+                const d = await r.json();
+                if (d.success) { alert("Profile updated!"); localStorage.setItem('user_full_name', newName); loadProfile() }
+                else { alert(d.message) }
+            } catch (e) { alert("Connection failed!") }
+        }
+
+        function showAchievements(){
+            const scans=parseInt(localStorage.getItem('user_total_scans')||0);
+            const verified=parseInt(localStorage.getItem('user_verified_count')||0);
+            const pts=parseInt(localStorage.getItem('user_points')||0);
+            const badges=[
+                {icon:'🌱',name:'First Step',desc:'Complete your first scan',done:scans>=1},
+                {icon:'♻️',name:'Eco Starter',desc:'Scan 5 waste items',done:scans>=5},
+                {icon:'🏆',name:'Green Champion',desc:'Get 10 verified disposals',done:verified>=10},
+                {icon:'⭐',name:'Point Collector',desc:'Earn 100+ points',done:pts>=100},
+                {icon:'🔥',name:'Streak Master',desc:'Scan 25 waste items',done:scans>=25},
+                {icon:'💎',name:'Eco Legend',desc:'Earn 500+ points',done:pts>=500}
+            ];
+            let html='<div style="text-align:center;margin-bottom:18px"><h3 style="font-size:18px;font-weight:700;color:#1e293b">🏆 Achievements</h3><p style="font-size:13px;color:#64748b;margin-top:4px">'+badges.filter(b=>b.done).length+' of '+badges.length+' unlocked</p></div>';
+            badges.forEach(b=>{
+                html+=`<div style="display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid #f1f5f9;opacity:${b.done?1:0.4}">
+                    <div style="width:44px;height:44px;border-radius:12px;background:${b.done?'rgba(22,163,74,.1)':'#f8fafc'};display:flex;align-items:center;justify-content:center;font-size:22px">${b.icon}</div>
+                    <div style="flex:1"><h4 style="font-size:14px;font-weight:600;color:#1e293b">${b.name}</h4><p style="font-size:12px;color:#64748b">${b.desc}</p></div>
+                    <div style="font-size:16px">${b.done?'✅':'🔒'}</div>
+                </div>`;
+            });
+            html+='<button onclick="closeModal()" style="width:100%;margin-top:18px;padding:12px;background:#16a34a;color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer">Close</button>';
+            openModal(html);
+        }
+
+        function showSettings(){
+            const notif=localStorage.getItem('setting_notifications')!=='false';
+            const theme=localStorage.getItem('setting_theme')||'dark';
+            let html='<div style="text-align:center;margin-bottom:18px"><h3 style="font-size:18px;font-weight:700;color:#1e293b">⚙️ Settings</h3></div>';
+            html+=`<div style="padding:16px 0;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center">
+                <div><h4 style="font-size:14px;font-weight:600;color:#1e293b">Notifications</h4><p style="font-size:12px;color:#64748b">Push notifications</p></div>
+                <label style="position:relative;width:48px;height:26px;cursor:pointer">
+                    <input type="checkbox" id="notif-toggle" ${notif?'checked':''} onchange="localStorage.setItem('setting_notifications',this.checked)" style="opacity:0;width:0;height:0">
+                    <span style="position:absolute;top:0;left:0;right:0;bottom:0;background:${notif?'#16a34a':'#d1d5db'};border-radius:26px;transition:.3s"></span>
+                    <span style="position:absolute;top:3px;left:${notif?'24px':'3px'};width:20px;height:20px;background:#fff;border-radius:50%;transition:.3s;box-shadow:0 1px 3px rgba(0,0,0,.2)"></span>
+                </label>
+            </div>`;
+            html+=`<div style="padding:16px 0;border-bottom:1px solid #f1f5f9">
+                <h4 style="font-size:14px;font-weight:600;color:#1e293b;margin-bottom:8px">Theme</h4>
+                <div style="display:flex;gap:10px">
+                    <button onclick="localStorage.setItem('setting_theme','dark');closeModal()" style="flex:1;padding:10px;border:2px solid ${theme==='dark'?'#16a34a':'#e2e8f0'};border-radius:10px;background:${theme==='dark'?'rgba(22,163,74,.1)':'#fff'};cursor:pointer;font-size:13px;font-weight:600;color:#1e293b">🌙 Dark</button>
+                    <button onclick="localStorage.setItem('setting_theme','light');closeModal()" style="flex:1;padding:10px;border:2px solid ${theme==='light'?'#16a34a':'#e2e8f0'};border-radius:10px;background:${theme==='light'?'rgba(22,163,74,.1)':'#fff'};cursor:pointer;font-size:13px;font-weight:600;color:#1e293b">☀️ Light</button>
+                </div>
+            </div>`;
+            html+=`<div style="padding:16px 0">
+                <h4 style="font-size:14px;font-weight:600;color:#1e293b;margin-bottom:8px">Language</h4>
+                <select style="width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:10px;font-size:14px;color:#1e293b" onchange="localStorage.setItem('setting_lang',this.value)">
+                    <option value="en" selected>English</option>
+                    <option value="hi">Hindi</option>
+                </select>
+            </div>`;
+            html+='<button onclick="closeModal()" style="width:100%;margin-top:10px;padding:12px;background:#16a34a;color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer">Save & Close</button>';
+            openModal(html);
+        }
+
+        function showHelp(){
+            let html='<div style="text-align:center;margin-bottom:18px"><h3 style="font-size:18px;font-weight:700;color:#1e293b">❓ Help & Support</h3></div>';
+            const faqs=[
+                {q:'How do I scan waste?',a:'Go to Home, tap the camera icon, and take a photo of your waste item. Our AI will identify the type.'},
+                {q:'How do points work?',a:'You earn +10 points for each verified disposal. Mismatch deducts -5 points.'},
+                {q:'How to redeem points?',a:'Go to Rewards page and tap "Redeem Points". Minimum 50 points required.'},
+                {q:'What is QR verification?',a:'After scanning waste, visit the recommended bin and scan its QR code to verify your disposal.'}
+            ];
+            faqs.forEach((f,i)=>{
+                html+=`<div style="padding:14px 0;border-bottom:1px solid #f1f5f9">
+                    <h4 style="font-size:14px;font-weight:600;color:#1e293b;cursor:pointer" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+                        ${f.q} <span style="float:right;color:#94a3b8">▼</span>
+                    </h4>
+                    <p style="font-size:13px;color:#64748b;margin-top:8px;line-height:1.5;display:${i===0?'block':'none'}">${f.a}</p>
+                </div>`;
+            });
+            html+=`<div style="margin-top:18px;padding:16px;background:rgba(22,163,74,.06);border-radius:12px;text-align:center">
+                <p style="font-size:13px;color:#64748b;margin-bottom:6px">Need more help?</p>
+                <p style="font-size:14px;font-weight:600;color:#16a34a"><i class="fa-solid fa-envelope" style="margin-right:4px"></i> support@wastebuddy.com</p>
+            </div>`;
+            html+=`<div style="text-align:center;margin-top:14px;font-size:12px;color:#94a3b8">Waste Buddy v1.0.0</div>`;
+            html+='<button onclick="closeModal()" style="width:100%;margin-top:14px;padding:12px;background:#16a34a;color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer">Close</button>';
+            openModal(html);
+        }
+
+        function logout() {
+            if (!confirm("Are you sure you want to logout?")) return;
+            localStorage.clear();
+            window.location.href = 'index.html';
+        }
+
+        window.onload = loadProfile;
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waste Buddy - Sign Up</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="mobile-frame">
+        <div class="top-bar">
+            <a href="index.html" style="color:inherit;text-decoration:none"><i class="fa-solid fa-arrow-left"></i></a>
+        </div>
+        <div class="dustbin-icon"><i class="fa-solid fa-recycle"></i></div>
+        <div class="screen-header">
+            <h2>Create Account</h2>
+            <p>Join Waste Buddy and make a difference.</p>
+        </div>
+        <div class="form-container">
+            <form id="signup-form">
+                <div class="input-group">
+                    <i class="fa-regular fa-user"></i>
+                    <input type="text" id="full-name" placeholder="Full Name" required>
+                </div>
+                <div class="input-group">
+                    <i class="fa-regular fa-envelope"></i>
+                    <input type="email" id="email" placeholder="Email Address" required>
+                </div>
+                <div class="input-group">
+                    <i class="fa-solid fa-mobile-screen"></i>
+                    <input type="tel" id="mobile" placeholder="Phone Number" required>
+                </div>
+                <div class="input-group">
+                    <i class="fa-solid fa-lock"></i>
+                    <input type="password" id="password" placeholder="Password" required>
+                    <i class="fa-regular fa-eye-slash toggle-password" id="eye-pass" onclick="toggleVis('password','eye-pass')" style="cursor:pointer;color:#94a3b8"></i>
+                </div>
+                <div class="input-group">
+                    <i class="fa-solid fa-lock"></i>
+                    <input type="password" id="confirm-password" placeholder="Confirm Password" required>
+                    <i class="fa-regular fa-eye-slash toggle-password" id="eye-confirm" onclick="toggleVis('confirm-password','eye-confirm')" style="cursor:pointer;color:#94a3b8"></i>
+                </div>
+                <div class="terms-group">
+                    <input type="checkbox" id="terms" required>
+                    <label for="terms">I agree to the <a href="#">Terms & Conditions</a></label>
+                </div>
+                <button type="button" class="btn-primary" id="signup-btn" onclick="handleSignup()">Sign Up</button>
+            </form>
+            <div class="divider"><span>or continue with</span></div>
+            <div class="social-login">
+                <button class="social-btn"><i class="fa-brands fa-google" style="color:#DB4437"></i></button>
+                <button class="social-btn"><i class="fa-brands fa-facebook" style="color:#1877F2"></i></button>
+                <button class="social-btn"><i class="fa-brands fa-apple" style="color:#000"></i></button>
+            </div>
+            <div class="bottom-link">Already have an account? <a href="index.html">Login</a></div>
+        </div>
+    </div>
+<script src="js/config.js"></script>
+<script>
+async function handleSignup(){
+    const name=document.getElementById('full-name').value.trim();
+    const email=document.getElementById('email').value.trim();
+    const mobile=document.getElementById('mobile').value.trim();
+    const pass=document.getElementById('password').value;
+    const confirm=document.getElementById('confirm-password').value;
+    if(!name||!email||!pass){alert("Please fill all required fields!");return}
+    if(pass!==confirm){alert("Passwords do not match!");return}
+    if(!document.getElementById('terms').checked){alert("Please agree to Terms & Conditions");return}
+    const btn=document.getElementById('signup-btn');btn.textContent='Creating...';btn.disabled=true;
+    try{
+        const res=await fetch(`${BACKEND_URL}/signup`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,password:pass,mobile})});
+        const data=await res.json();
+        if(data.success){alert("Account created! Please login.");window.location.href="index.html"}
+        else{alert(data.message)}
+    }catch(e){alert("Server connection failed!")}
+    btn.textContent='Sign Up';btn.disabled=false;
+}
+function toggleVis(id,iconId){
+    const i=document.getElementById(id),e=document.getElementById(iconId);
+    if(i.type==='password'){i.type='text';e.classList.remove('fa-eye-slash');e.classList.add('fa-eye')}
+    else{i.type='password';e.classList.remove('fa-eye');e.classList.add('fa-eye-slash')}
+}
+</script>
+</body>
+</html>

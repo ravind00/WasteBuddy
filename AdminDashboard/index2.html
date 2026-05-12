@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waste Buddy Admin Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+<div class="container">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">
+            <h2>♻ WASTE BUDDY</h2>
+            <p>Admin Dashboard</p>
+        </div>
+
+        <ul>
+            <li class="menu active" data-target="dashboard">
+                <i class="fa-solid fa-house"></i> Dashboard
+            </li>
+
+            <li class="menu" data-target="bins">
+                <i class="fa-solid fa-trash"></i> Bins
+            </li>
+
+            <li class="menu" data-target="collections">
+                <i class="fa-solid fa-truck"></i> Collections
+            </li>
+
+            <li class="menu" data-target="routes">
+                <i class="fa-solid fa-route"></i> Routes
+            </li>
+
+            <li class="menu" data-target="alerts">
+                <i class="fa-solid fa-triangle-exclamation"></i> Alerts
+            </li>
+
+            <li class="menu" data-target="users">
+                <i class="fa-solid fa-users"></i> Users
+            </li>
+
+            <li class="menu" data-target="reports">
+                <i class="fa-solid fa-chart-line"></i> Reports
+            </li>
+
+            <li class="menu" data-target="settings">
+                <i class="fa-solid fa-gear"></i> Settings
+            </li>
+
+            <li class="menu" data-target="logout">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </li>
+        </ul>
+    </div>
+
+
+    <!-- Main Content -->
+    <div class="main-content">
+
+        <!-- Dashboard -->
+        <section id="dashboard" class="page active-page">
+            <div class="topbar">
+                <div>
+                    <h1>Welcome Back, Admin123 👋</h1>
+                    <p>Smart Waste Management System</p>
+                </div>
+                <div class="date">May 2025</div>
+            </div>
+
+            <div class="cards">
+                <div class="card">
+                    <h3>Total Bins</h3>
+                    <h1 id="totalBins">12</h1>
+                </div>
+
+                <div class="card red">
+                    <h3>Active Alerts</h3>
+                    <h1 id="activeAlerts">0</h1>
+                </div>
+
+                <div class="card yellow">
+                    <h3>Total Collections</h3>
+                    <h1 id="totalCollections">45</h1>
+                </div>
+
+                <div class="card green">
+                    <h3>Avg Fill Level</h3>
+                    <h1 id="avgFill">0%</h1>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="dashboard-box">
+                    <h2>Bin Status</h2>
+                    <div id="dashboardBins" class="bin-grid"></div>
+                </div>
+
+                <div class="dashboard-box">
+                    <h2>Recent Alerts</h2>
+                    <div id="recentAlerts"></div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- Bins -->
+        <section id="bins" class="page">
+            <div class="section-header">
+                <h2>Bins Management</h2>
+            </div>
+
+            <div id="binsContainer" class="bin-grid"></div>
+        </section>
+
+
+        <!-- Collections -->
+        <section id="collections" class="page">
+            <div class="section-header">
+                <h2>Collections</h2>
+                <button class="btn">+ New Collection</button>
+            </div>
+
+            <input type="text" id="collectionSearch" placeholder="Search Collection ID...">
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Collection ID</th>
+                        <th>Route</th>
+                        <th>Driver</th>
+                        <th>Status</th>
+                        <th>Time / Location</th>
+                    </tr>
+                </thead>
+
+                <tbody id="collectionTable"></tbody>
+            </table>
+        </section>
+
+
+        <!-- Routes -->
+        <section id="routes" class="page">
+            <div class="section-header">
+                <h2>Route Optimization</h2>
+
+                <select id="driverSelect">
+                    <option value="Driver 1">Driver 1</option>
+                    <option value="Driver 2">Driver 2</option>
+                    <option value="Driver 3">Driver 3</option>
+                </select>
+            </div>
+
+            <div class="route-box">
+                <h3 id="routeTitle">Bhopal Smart Route</h3>
+
+                <div class="map-area">
+                    <div class="route-point green-point">Bin 1</div>
+                    <div class="route-point red-point">Bin 2</div>
+                    <div class="route-point yellow-point">Bin 3</div>
+                    <div class="route-point green-point">Bin 4</div>
+                    <div class="route-point red-point">Bin 5</div>
+                </div>
+
+                <div class="route-stats">
+                    <div class="card">
+                        <h3>Total Distance</h3>
+                        <h1 id="distance">4.2 km</h1>
+                    </div>
+
+                    <div class="card yellow">
+                        <h3>Est. Time</h3>
+                        <h1 id="time">28 min</h1>
+                    </div>
+
+                    <div class="card green">
+                        <h3>Fuel Saved</h3>
+                        <h1 id="fuel">20%</h1>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- Alerts -->
+        <section id="alerts" class="page">
+            <div class="section-header">
+                <h2>Alerts</h2>
+            </div>
+
+            <div class="alert-tabs">
+                <button class="alert-filter active-filter" data-filter="all">All</button>
+                <button class="alert-filter" data-filter="critical">Critical</button>
+                <button class="alert-filter" data-filter="warning">Warning</button>
+                <button class="alert-filter" data-filter="info">Info</button>
+            </div>
+
+            <div id="alertsContainer"></div>
+        </section>
+
+
+        <!-- Users -->
+        <section id="users" class="page">
+            <div class="section-header">
+                <h2>Users</h2>
+                <button class="btn">+ Add User</button>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Role</th>
+                        <th>Phone</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr>
+                        <td>Admin123</td>
+                        <td>Admin</td>
+                        <td>9999999999</td>
+                        <td class="green-text">Active</td>
+                    </tr>
+
+                    <tr>
+                        <td>Driver 1</td>
+                        <td>Driver</td>
+                        <td>8888888888</td>
+                        <td class="green-text">Active</td>
+                    </tr>
+
+                    <tr>
+                        <td>Driver 2</td>
+                        <td>Driver</td>
+                        <td>7777777777</td>
+                        <td class="red-text">Inactive</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+
+        <!-- Reports -->
+        <section id="reports" class="page">
+            <div class="section-header">
+                <h2>Reports</h2>
+            </div>
+
+            <div class="cards">
+                <div class="card">
+                    <h3>Total Collections</h3>
+                    <h1>45</h1>
+                </div>
+
+                <div class="card yellow">
+                    <h3>Total Distance</h3>
+                    <h1>189 KM</h1>
+                </div>
+
+                <div class="card green">
+                    <h3>Fuel Saved</h3>
+                    <h1>18.7 L</h1>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- Settings -->
+        <section id="settings" class="page">
+            <div class="section-header">
+                <h2>Settings</h2>
+            </div>
+
+            <div class="settings-box">
+                <input type="text" placeholder="City Name" value="Bhopal">
+                <input type="text" placeholder="Language" value="English">
+                <input type="text" placeholder="Time Zone" value="Asia/Kolkata">
+                <button class="btn">Save Changes</button>
+            </div>
+        </section>
+
+
+        <!-- Logout -->
+        <section id="logout" class="page">
+            <div class="logout-box">
+                <h1>Logout</h1>
+                <p>Do you want to logout or remove account?</p>
+
+                <button class="btn">Logout</button>
+                <button class="delete-btn">Remove Account</button>
+            </div>
+        </section>
+
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waste Buddy - Verify Disposal</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .verify-status{text-align:center;padding:24px 16px;border-radius:16px;margin-bottom:16px}
+        .verify-status.pending{background:rgba(245,158,11,.08);border:2px solid rgba(245,158,11,.25)}
+        .verify-status.match{background:rgba(22,163,74,.08);border:2px solid rgba(22,163,74,.3)}
+        .verify-status.mismatch{background:rgba(220,38,38,.08);border:2px solid rgba(220,38,38,.3)}
+        .status-icon{width:60px;height:60px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:28px}
+        .status-icon.pending{background:rgba(245,158,11,.15);color:#f59e0b}
+        .status-icon.match{background:rgba(22,163,74,.15);color:#16a34a}
+        .status-icon.mismatch{background:rgba(220,38,38,.15);color:#dc2626}
+        .pulse{animation:pulse 1.5s ease-in-out infinite}
+        @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.08);opacity:.7}}
+        .status-title{font-size:16px;font-weight:700;margin-bottom:4px}
+        .status-msg{font-size:13px;color:var(--text-light);line-height:1.5}
+        .step-list{list-style:none;padding:0;margin:0}
+        .step-list li{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--text)}
+        .step-list li:last-child{border-bottom:none}
+        .step-num{width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+    </style>
+</head>
+<body>
+    <div class="mobile-frame result-page">
+        <div class="bg-wrapper" style="background:var(--dark-bg)"></div>
+        <div class="result-header">
+            <a href="scan_result.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i></a>
+            <h2>Verify Disposal</h2>
+        </div>
+        <div class="result-body">
+            <!-- Selected bin -->
+            <div class="verify-card">
+                <p style="font-size:13px;color:var(--text-light);margin-bottom:12px">You need to drop in:</p>
+                <div class="selected-bin" id="selected-bin">
+                    <h3 id="sel-bin-label">BLUE BIN (DRY WASTE)</h3>
+                </div>
+                <div class="tip-card" id="tip-card" style="display:none">
+                    <i class="fa-solid fa-lightbulb"></i>
+                    <span id="tip-text"></span>
+                </div>
+                <button class="btn-directions" onclick="openDirections()">
+                    <i class="fa-solid fa-diamond-turn-right" style="margin-right:6px"></i> Get Directions to Bin
+                </button>
+            </div>
+
+            <!-- Live verification status -->
+            <div class="verify-status pending" id="verify-status">
+                <div class="status-icon pending pulse" id="status-icon">
+                    <i class="fa-solid fa-clock" id="status-icon-i"></i>
+                </div>
+                <div class="status-title" id="status-title">Waiting for Bin Camera...</div>
+                <div class="status-msg" id="status-msg">Go to the bin and drop your waste. The bin camera will verify automatically.</div>
+            </div>
+
+            <!-- Steps guide -->
+            <div class="verify-card">
+                <h4 style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:12px">How it works</h4>
+                <ul class="step-list">
+                    <li><span class="step-num">1</span><span>Go to the recommended bin nearby</span></li>
+                    <li><span class="step-num">2</span><span>Drop your waste in front of the bin camera</span></li>
+                    <li><span class="step-num">3</span><span>Bin camera will scan and verify your trash</span></li>
+                    <li><span class="step-num">4</span><span>Points are added automatically if matched!</span></li>
+                </ul>
+            </div>
+
+            <div class="skip-link"><a href="home.html">I will do it later</a></div>
+        </div>
+    </div>
+<script src="js/config.js"></script>
+<script>
+const bin=localStorage.getItem('verify_bin')||'Unknown';
+const wasteType=localStorage.getItem('verify_waste_type')||'Unknown';
+const binLabel=localStorage.getItem('verify_bin_label')||'Unknown Bin';
+const binColors={Blue:'#2563eb',Green:'#16a34a',Red:'#dc2626',Unknown:'#6b7280'};
+let pollInterval=null;
+
+document.addEventListener('DOMContentLoaded',function(){
+    document.getElementById('sel-bin-label').textContent=binLabel.toUpperCase();
+    const selDiv=document.getElementById('selected-bin');
+    selDiv.style.background=`${binColors[bin]||binColors.Unknown}11`;
+    selDiv.querySelector('h3').style.color=binColors[bin]||binColors.Unknown;
+
+    // Show recycling tip
+    const tip=localStorage.getItem('verify_tip');
+    if(tip){
+        const tipCard=document.getElementById('tip-card');
+        const c=binColors[bin]||binColors.Unknown;
+        tipCard.style.display='flex';
+        tipCard.style.background=c+'14';
+        tipCard.style.borderColor=c+'55';
+        tipCard.style.color=c;
+        tipCard.querySelector('i').style.color=c;
+        document.getElementById('tip-text').textContent=tip;
+    }
+
+    // Start polling for bin camera verification
+    startPolling();
+});
+
+function openDirections(){
+    const binTypeMap={Blue:'dry',Green:'wet',Red:'ewaste'};
+    const type=binTypeMap[bin]||'all';
+    window.location.href=`bin_location.html?highlight=${type}&bin=${bin}`;
+}
+
+function startPolling(){
+    const loginId=localStorage.getItem('user_login_id');
+    if(!loginId)return;
+
+    pollInterval=setInterval(async()=>{
+        try{
+            const r=await fetch(`${BACKEND_URL}/check_verification?login_id=${loginId}`);
+            const d=await r.json();
+            if(d.success){
+                if(d.status==='match'){
+                    clearInterval(pollInterval);
+                    showMatchResult(d);
+                } else if(d.status==='mismatch'){
+                    clearInterval(pollInterval);
+                    showMismatchResult(d);
+                }
+                // pending = keep polling
+            }
+        }catch(e){}
+    }, 3000); // Poll every 3 seconds
+}
+
+function showMatchResult(d){
+    const box=document.getElementById('verify-status');
+    box.className='verify-status match';
+    document.getElementById('status-icon').className='status-icon match';
+    document.getElementById('status-icon-i').className='fa-solid fa-check';
+    document.getElementById('status-title').textContent='✅ Disposal Verified!';
+    document.getElementById('status-title').style.color='#16a34a';
+    document.getElementById('status-msg').textContent=d.message||'Your trash matched the bin. Points added!';
+
+    localStorage.setItem('verify_points_earned', d.points_earned);
+    localStorage.setItem('user_points', d.new_points);
+
+    // Auto-redirect to success page after 2 seconds
+    setTimeout(()=>{window.location.href='verify_success.html'},2000);
+}
+
+function showMismatchResult(d){
+    const box=document.getElementById('verify-status');
+    box.className='verify-status mismatch';
+    document.getElementById('status-icon').className='status-icon mismatch';
+    document.getElementById('status-icon-i').className='fa-solid fa-triangle-exclamation';
+    document.getElementById('status-title').textContent='⚠️ Wrong Bin Detected!';
+    document.getElementById('status-title').style.color='#dc2626';
+    document.getElementById('status-msg').innerHTML=`<strong>${d.message||'Mismatch detected.'}</strong><br>-5 points deducted as penalty.`;
+
+    localStorage.setItem('user_points', d.new_points);
+}
+
+// Cleanup on page leave
+window.addEventListener('beforeunload',()=>{if(pollInterval)clearInterval(pollInterval)});
+</script>
+</body>
+</html>

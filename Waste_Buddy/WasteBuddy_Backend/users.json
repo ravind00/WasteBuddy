@@ -1,0 +1,218 @@
+{
+  "spatel86411@gmail.com": {
+    "name": "Shivam Patel",
+    "password": "Shivam#10",
+    "mobile": null,
+    "points": 40
+  },
+  "ravindsriwas2930@gmail.com": {
+    "name": "Ravind Sriwas",
+    "password": "Ravind@2006",
+    "mobile": null,
+    "points": 110,
+    "history": [
+      {
+        "date": "12 May 2026, 08:48 AM",
+        "waste_type": "Dry",
+        "expected": "Blue",
+        "actual": "Blue",
+        "points": "+10",
+        "status": "verified"
+      },
+      {
+        "date": "12 May 2026, 08:47 AM",
+        "waste_type": "Dry",
+        "expected": "Blue",
+        "actual": "Blue",
+        "points": "+10",
+        "status": "verified"
+      },
+      {
+        "date": "12 May 2026, 08:42 AM",
+        "waste_type": "Dry",
+        "expected": "Blue",
+        "actual": "",
+        "points": "",
+        "status": "pending"
+      },
+      {
+        "date": "12 May 2026, 08:41 AM",
+        "waste_type": "Dry",
+        "expected": "Blue",
+        "actual": "",
+        "points": "",
+        "status": "pending"
+      },
+      {
+        "date": "12 May 2026, 08:41 AM",
+        "waste_type": "Dry",
+        "expected": "Blue",
+        "actual": "",
+        "points": "",
+        "status": "pending"
+      },
+      {
+        "date": "12 May 2026, 08:41 AM",
+        "waste_type": "Dry",
+        "expected": "Blue",
+        "actual": "",
+        "points": "",
+        "status": "pending"
+      },
+      {
+        "date": "12 May 2026, 08:40 AM",
+        "waste_type": "Dry",
+        "expected": "Blue",
+        "actual": "",
+        "points": "",
+        "status": "pending"
+      },
+      {
+        "date": "12 May 2026, 08:40 AM",
+        "waste_type": "Dry",
+        "expected": "Blue",
+        "actual": "",
+        "points": "",
+        "status": "pending"
+      },
+      {
+        "date": "12 May 2026, 08:32 AM",
+        "waste_type": "E-Waste",
+        "expected": "Red",
+        "actual": "Blue",
+        "points": "-5",
+        "status": "mismatch"
+      },
+      {
+        "date": "12 May 2026, 08:31 AM",
+        "waste_type": "Dry",
+        "expected": "Blue",
+        "actual": "Blue",
+        "points": "+10",
+        "status": "verified"
+      },
+      {
+        "date": "11 May 2026, 09:05 PM",
+        "expected": "Blue",
+        "actual": "Green",
+        "points": "-5",
+        "status": "mismatch"
+      },
+      {
+        "date": "11 May 2026, 09:04 PM",
+        "expected": "Blue",
+        "actual": "Red",
+        "points": "-5",
+        "status": "mismatch"
+      },
+      {
+        "date": "11 May 2026, 09:02 PM",
+        "expected": "Blue",
+        "actual": "Red",
+        "points": "-5",
+        "status": "mismatch"
+      },
+      {
+        "date": "11 May 2026, 09:02 PM",
+        "expected": "Blue",
+        "actual": "Blue",
+        "points": "+10",
+        "status": "match"
+      },
+      {
+        "date": "11 May 2026, 09:01 PM",
+        "expected": "Blue",
+        "actual": "Blue",
+        "points": "+10",
+        "status": "match"
+      },
+      {
+        "date": "11 May 2026, 06:34 PM",
+        "expected": "Blue",
+        "actual": "Blue",
+        "points": "+10",
+        "status": "match"
+      }
+    ],
+    "total_scans": 10,
+    "transactions": [
+      {
+        "date": "12 May 2026, 08:48 AM",
+        "description": "Dry (Verified by Bin)",
+        "points": "+10",
+        "type": "earned"
+      },
+      {
+        "date": "12 May 2026, 08:47 AM",
+        "description": "Dry (Verified by Bin)",
+        "points": "+10",
+        "type": "earned"
+      },
+      {
+        "date": "12 May 2026, 08:32 AM",
+        "description": "E-Waste (Wrong Bin)",
+        "points": "-5",
+        "type": "penalty"
+      },
+      {
+        "date": "12 May 2026, 08:31 AM",
+        "description": "Dry (Verified by Bin)",
+        "points": "+10",
+        "type": "earned"
+      }
+    ],
+    "verified_count": 3
+  },
+  "test@example.com": {
+    "name": "Test User",
+    "password": "Password123",
+    "mobile": "1234567890",
+    "points": 0,
+    "total_scans": 1,
+    "verified_count": 0,
+    "join_date": "12 May 2026",
+    "history": [],
+    "transactions": []
+  },
+  "movieexpress86411@gmail.com": {
+    "name": "Shivam Patel",
+    "password": "shivam1234",
+    "mobile": "6261193206",
+    "points": 5,
+    "total_scans": 2,
+    "verified_count": 1,
+    "join_date": "12 May 2026",
+    "history": [
+      {
+        "date": "12 May 2026, 08:54 AM",
+        "waste_type": "Dry",
+        "expected": "Blue",
+        "actual": "Red",
+        "points": "-5",
+        "status": "mismatch"
+      },
+      {
+        "date": "12 May 2026, 08:53 AM",
+        "waste_type": "Dry",
+        "expected": "Blue",
+        "actual": "Blue",
+        "points": "+10",
+        "status": "verified"
+      }
+    ],
+    "transactions": [
+      {
+        "date": "12 May 2026, 08:54 AM",
+        "description": "Dry (Wrong Bin)",
+        "points": "-5",
+        "type": "penalty"
+      },
+      {
+        "date": "12 May 2026, 08:53 AM",
+        "description": "Dry (Verified by Bin)",
+        "points": "+10",
+        "type": "earned"
+      }
+    ]
+  }
+}

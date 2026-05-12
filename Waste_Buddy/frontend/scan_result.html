@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waste Buddy - Scan Result</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="mobile-frame result-page">
+        <div class="bg-wrapper" style="background:var(--dark-bg)"></div>
+        <div class="result-header">
+            <a href="home.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i></a>
+            <h2>Scan Result</h2>
+        </div>
+        <div class="result-body">
+            <div class="waste-type-card">
+                <div id="waste-icon" style="width:80px;height:80px;border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:36px;background:#f0fdf4">
+                    <i class="fa-solid fa-recycle" style="color:#16a34a"></i>
+                </div>
+                <div class="waste-type-label">Predicted Waste Type</div>
+                <div class="waste-type-name" id="waste-type">DRY WASTE</div>
+                <div class="confidence-bar"><div class="confidence-fill" id="conf-fill" style="width:0%;background:var(--accent)"></div></div>
+                <div class="confidence-text">Confidence: <span id="conf-text">0%</span></div>
+            </div>
+            <div class="tip-card" id="tip-card">
+                <i class="fa-solid fa-lightbulb" style="margin-right:6px"></i>
+                <span id="tip-text">Please dispose the waste in the nearest suitable bin.</span>
+            </div>
+            <div class="bin-recommend-card">
+                <h4>Recommended Bin</h4>
+                <div class="bin-recommend-row">
+                    <div class="bin-color-dot" id="bin-dot" style="background:rgba(37,99,235,.1)">🔵</div>
+                    <div class="bin-recommend-info">
+                        <h3 id="bin-label">Blue Bin (Dry Waste)</h3>
+                        <p id="bin-distance">120 m away</p>
+                    </div>
+                </div>
+            </div>
+            <button class="btn-primary" onclick="goToVerify()" style="margin-bottom:10px">
+                <i class="fa-solid fa-location-dot" style="margin-right:6px"></i> Find Nearest Bin
+            </button>
+            <button class="btn-outline" onclick="window.location.href='home.html'">
+                <i class="fa-solid fa-camera-rotate" style="margin-right:6px"></i> Scan Again
+            </button>
+        </div>
+        <div class="bottom-nav">
+            <a href="home.html" class="nav-item active"><i class="fa-solid fa-house"></i><span>Home</span></a>
+            <a href="history.html" class="nav-item"><i class="fa-solid fa-clock-rotate-left"></i><span>Scan History</span></a>
+            <a href="bin_location.html" class="nav-item"><i class="fa-solid fa-location-dot"></i><span>Bin Location</span></a>
+            <a href="rewards.html" class="nav-item"><i class="fa-solid fa-gift"></i><span>Rewards</span></a>
+            <a href="profile.html" class="nav-item"><i class="fa-solid fa-user"></i><span>Profile</span></a>
+        </div>
+    </div>
+<script src="js/config.js"></script>
+<script>
+const data=JSON.parse(localStorage.getItem('scan_result')||'{}');
+const binColors={Blue:'#2563eb',Green:'#16a34a',Red:'#dc2626',Unknown:'#6b7280'};
+const binEmojis={Blue:'🔵',Green:'🟢',Red:'🔴',Unknown:'🗑️'};
+const binBgs={Blue:'rgba(37,99,235,.1)',Green:'rgba(22,163,74,.1)',Red:'rgba(220,38,38,.1)',Unknown:'rgba(107,114,128,.1)'};
+
+document.addEventListener('DOMContentLoaded',function(){
+    if(!data.waste_type){window.location.href='home.html';return}
+    document.getElementById('waste-type').textContent=data.waste_type.toUpperCase();
+    const conf=Math.round((data.confidence||0)*100);
+    document.getElementById('conf-text').textContent=conf+'%';
+    setTimeout(()=>{document.getElementById('conf-fill').style.width=conf+'%'},100);
+    const bin=data.target_bin||'Unknown';
+    document.getElementById('conf-fill').style.background=binColors[bin]||binColors.Unknown;
+    document.getElementById('bin-label').textContent=data.bin_label||bin+' Bin';
+    document.getElementById('bin-dot').textContent=binEmojis[bin]||'🗑️';
+    document.getElementById('bin-dot').style.background=binBgs[bin]||binBgs.Unknown;
+    document.getElementById('bin-distance').textContent=Math.floor(Math.random()*300+50)+' m away';
+    if(data.recycle_method)document.getElementById('tip-text').textContent=data.recycle_method;
+    // Set waste icon color
+    const iconEl=document.getElementById('waste-icon');
+    iconEl.style.background=binBgs[bin]||binBgs.Unknown;
+    iconEl.querySelector('i').style.color=binColors[bin]||binColors.Unknown;
+
+    // Notify backend
+    const loginId=localStorage.getItem('user_login_id');
+    if(loginId){
+        fetch(`${BACKEND_URL}/set_pending_drop`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({login_id:loginId,expected_bin:bin,waste_type:data.waste_type})});
+    }
+});
+
+function goToVerify(){
+    localStorage.setItem('verify_bin',data.target_bin||'Unknown');
+    localStorage.setItem('verify_waste_type',data.waste_type||'Unknown');
+    localStorage.setItem('verify_bin_label',data.bin_label||'Unknown Bin');
+    localStorage.setItem('verify_tip',data.recycle_method||'');
+    window.location.href='verify.html';
+}
+</script>
+</body>
+</html>

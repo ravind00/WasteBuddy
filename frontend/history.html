@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waste Buddy - Scan History</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="mobile-frame history-page">
+        <div class="page-header">
+            <a href="home.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i></a>
+            <h2>Scan History</h2>
+        </div>
+        <div class="filter-tabs">
+            <button class="filter-tab active" onclick="filterHistory('all',this)">All</button>
+            <button class="filter-tab" onclick="filterHistory('verified',this)">Verified</button>
+            <button class="filter-tab" onclick="filterHistory('pending',this)">Pending</button>
+            <button class="filter-tab" onclick="filterHistory('not_verified',this)">Not Verified</button>
+        </div>
+        <div class="history-list" id="history-list">
+            <div class="empty-msg">Loading history...</div>
+        </div>
+        <div class="bottom-nav">
+            <a href="home.html" class="nav-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
+            <a href="history.html" class="nav-item active"><i class="fa-solid fa-clock-rotate-left"></i><span>Scan History</span></a>
+            <a href="bin_location.html" class="nav-item"><i class="fa-solid fa-location-dot"></i><span>Bin Location</span></a>
+            <a href="rewards.html" class="nav-item"><i class="fa-solid fa-gift"></i><span>Rewards</span></a>
+            <a href="profile.html" class="nav-item"><i class="fa-solid fa-user"></i><span>Profile</span></a>
+        </div>
+    </div>
+<script src="js/config.js"></script>
+<script>
+const iconMap={Blue:{bg:'rgba(37,99,235,.12)',emoji:'🔵'},Green:{bg:'rgba(22,163,74,.12)',emoji:'🟢'},Red:{bg:'rgba(220,38,38,.12)',emoji:'🔴'},Unknown:{bg:'rgba(107,114,128,.12)',emoji:'🗑️'}};
+
+function renderHistory(items){
+    const el=document.getElementById('history-list');
+    if(!items||items.length===0){el.innerHTML='<div class="empty-msg">No history found yet.</div>';return}
+    el.innerHTML='';
+    items.forEach(h=>{
+        const bin=h.expected||'Unknown';
+        const ic=iconMap[bin]||iconMap.Unknown;
+        const wt=h.waste_type||h.expected||'Waste';
+        const isVerified=h.status==='verified'||h.status==='match';
+        const isMismatch=h.status==='mismatch';
+        const isPending=h.status==='pending';
+        let statusClass,statusText;
+        if(isVerified){statusClass='status-verified';statusText='Verified'}
+        else if(isMismatch){statusClass='status-mismatch';statusText='Not Verified'}
+        else{statusClass='status-pending';statusText='Pending'}
+        const ptsClass=(h.points||'').includes('-')?'pts-minus':'pts-plus';
+        const ptsLabel=(h.points||'').includes('-')?h.points+' (Penalty)':h.points;
+        el.innerHTML+=`<div class="history-card">
+            <div class="history-icon" style="background:${ic.bg}"><span>${ic.emoji}</span></div>
+            <div class="history-details">
+                <h4>${wt}</h4>
+                <span class="status ${statusClass}">${statusText}</span>
+                ${isMismatch?'<div style="font-size:11px;color:#dc2626;margin-top:2px">Expected: '+h.expected+' | Threw: '+h.actual+'</div>':''}
+                <div class="time">${h.date||''}</div>
+            </div>
+            <div class="history-pts ${ptsClass}">${ptsLabel||''}</div>
+        </div>`;
+    });
+}
+
+async function fetchHistory(filter='all'){
+    const id=localStorage.getItem('user_login_id');
+    if(!id){document.getElementById('history-list').innerHTML='<div class="empty-msg">Please login first.</div>';return}
+    try{
+        const r=await fetch(`${BACKEND_URL}/get_history?login_id=${id}&filter=${filter}`);
+        const d=await r.json();
+        if(d.success)renderHistory(d.history);
+        else document.getElementById('history-list').innerHTML='<div class="empty-msg">Failed to load.</div>';
+    }catch(e){document.getElementById('history-list').innerHTML='<div class="empty-msg">Connection failed.</div>'}
+}
+
+function filterHistory(f,btn){
+    document.querySelectorAll('.filter-tab').forEach(t=>t.classList.remove('active'));
+    btn.classList.add('active');
+    fetchHistory(f);
+}
+
+window.onload=()=>fetchHistory('all');
+</script>
+</body>
+</html>

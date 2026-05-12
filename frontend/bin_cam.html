@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waste Buddy - Bin Camera</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{background:#062223;color:#fff;font-family:'Inter',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center}
+        .header{padding:20px;text-align:center;width:100%}
+        .header h1{font-size:20px;font-weight:700;margin-bottom:4px}
+        .header p{font-size:13px;opacity:.6}
+        .badge{display:inline-block;padding:6px 16px;border-radius:20px;font-size:12px;font-weight:600;margin-top:10px}
+        .badge.waiting{background:rgba(245,158,11,.15);color:#f59e0b;border:1px solid rgba(245,158,11,.3)}
+        .badge.active{background:rgba(22,163,74,.15);color:#4ade80;border:1px solid rgba(22,163,74,.3)}
+        .pending-info{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:18px;margin:10px 20px 16px;width:calc(100% - 40px);max-width:400px}
+        .pending-info .row{display:flex;justify-content:space-between;padding:6px 0;font-size:13px}
+        .pending-info .label{opacity:.5}
+        .pending-info .value{font-weight:600;color:#4ade80}
+
+        /* Camera section */
+        .cam-container{width:calc(100% - 40px);max-width:400px;border-radius:16px;overflow:hidden;border:3px solid rgba(22,163,74,.4);box-shadow:0 0 30px rgba(22,163,74,.15);margin:0 20px;position:relative}
+        video{width:100%;display:block;background:#000}
+        canvas{display:none}
+        .cam-overlay{position:absolute;top:12px;right:12px;background:rgba(0,0,0,.6);padding:6px 12px;border-radius:8px;font-size:11px;font-weight:600;backdrop-filter:blur(6px)}
+
+        /* Upload fallback */
+        .upload-zone{width:calc(100% - 40px);max-width:400px;margin:0 20px;border:3px dashed rgba(22,163,74,.4);border-radius:16px;padding:40px 20px;text-align:center;cursor:pointer;transition:.3s}
+        .upload-zone:hover,.upload-zone:active{border-color:#4ade80;background:rgba(22,163,74,.05)}
+        .upload-zone i{font-size:48px;color:#4ade80;margin-bottom:12px;display:block}
+        .upload-zone h3{font-size:16px;margin-bottom:6px}
+        .upload-zone p{font-size:13px;opacity:.5}
+        .upload-zone input{display:none}
+        .preview-container{width:calc(100% - 40px);max-width:400px;margin:0 20px;border-radius:16px;overflow:hidden;border:3px solid rgba(22,163,74,.4);position:relative;display:none}
+        .preview-container img{width:100%;display:block}
+        .preview-overlay{position:absolute;top:12px;right:12px;background:rgba(0,0,0,.6);padding:6px 12px;border-radius:8px;font-size:11px;font-weight:600;backdrop-filter:blur(6px)}
+
+        /* Buttons */
+        .capture-btn{width:calc(100% - 40px);max-width:400px;margin:20px;padding:16px;background:#16a34a;color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:.3s}
+        .capture-btn:hover{background:#15803d;transform:scale(1.02)}
+        .capture-btn:disabled{background:#374151;cursor:not-allowed;transform:none}
+        .result-box{width:calc(100% - 40px);max-width:400px;margin:0 20px 20px;padding:20px;border-radius:16px;text-align:center;display:none}
+        .result-box.match{background:rgba(22,163,74,.12);border:2px solid rgba(22,163,74,.3)}
+        .result-box.mismatch{background:rgba(220,38,38,.12);border:2px solid rgba(220,38,38,.3)}
+        .result-box.retry{background:rgba(245,158,11,.12);border:2px solid rgba(245,158,11,.3)}
+        .result-box h3{font-size:18px;margin-bottom:6px}
+        .result-box p{font-size:13px;opacity:.8}
+        .no-pending{text-align:center;padding:60px 30px;opacity:.5}
+        .no-pending i{font-size:48px;margin-bottom:16px;display:block}
+        .mode-toggle{margin:12px 20px 0;font-size:12px;color:rgba(255,255,255,.4);text-align:center}
+        .mode-toggle a{color:#4ade80;cursor:pointer;text-decoration:underline}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><i class="fa-solid fa-trash-can" style="color:#4ade80;margin-right:6px"></i> Bin Camera</h1>
+        <p>Waste Buddy — Smart Bin Verification</p>
+        <div class="badge waiting" id="status-badge">
+            <i class="fa-solid fa-circle" style="font-size:6px;margin-right:4px;vertical-align:middle"></i>
+            <span id="badge-text">Checking for pending drops...</span>
+        </div>
+    </div>
+
+    <div id="pending-section" style="display:none">
+        <div class="pending-info">
+            <div class="row"><span class="label">Expected Bin</span><span class="value" id="exp-bin">—</span></div>
+            <div class="row"><span class="label">Waste Type</span><span class="value" id="exp-waste">—</span></div>
+            <div class="row"><span class="label">Scanned At</span><span class="value" id="exp-time" style="color:#94a3b8">—</span></div>
+        </div>
+
+        <!-- Live Camera (used on localhost/HTTPS) -->
+        <div class="cam-container" id="cam-section" style="display:none">
+            <video id="camera-stream" autoplay playsinline></video>
+            <canvas id="canvas"></canvas>
+            <div class="cam-overlay"><i class="fa-solid fa-circle" style="color:#ef4444;font-size:6px;margin-right:4px;vertical-align:middle"></i> LIVE</div>
+        </div>
+
+        <!-- Photo Upload (fallback for HTTP/phone) -->
+        <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+            <i class="fa-solid fa-camera"></i>
+            <h3>Tap to Take Photo</h3>
+            <p>Take a photo of the trash in the bin</p>
+            <input type="file" id="file-input" accept="image/*" capture="environment" onchange="handleFileSelect(event)">
+        </div>
+
+        <!-- Photo Preview -->
+        <div class="preview-container" id="preview-container">
+            <img id="preview-img" src="" alt="Preview">
+            <div class="preview-overlay">📸 Captured</div>
+        </div>
+
+        <div class="mode-toggle" id="mode-toggle"></div>
+
+        <button class="capture-btn" id="capture-btn" onclick="verifyTrash()">
+            <i class="fa-solid fa-magnifying-glass" style="font-size:20px"></i> Verify Trash
+        </button>
+
+        <div class="result-box" id="result-box">
+            <h3 id="result-title">—</h3>
+            <p id="result-msg">—</p>
+        </div>
+    </div>
+
+    <div id="no-pending-section">
+        <div class="no-pending">
+            <i class="fa-solid fa-hourglass-half"></i>
+            <h3>No Pending Drops</h3>
+            <p style="margin-top:8px;font-size:13px">Waiting for a user to scan waste from the app...</p>
+        </div>
+    </div>
+
+<script>
+const BACKEND_URL = 'http://' + window.location.hostname + ':8080';
+const video = document.getElementById('camera-stream');
+const canvas = document.getElementById('canvas');
+let cameraReady = false;
+let capturedBlob = null;
+let useCamera = false; // false = upload mode, true = live camera mode
+
+// Try live camera — if it works, show it. If not, fallback to upload.
+async function initCamera(){
+    try{
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+        video.srcObject = stream;
+        cameraReady = true;
+        useCamera = true;
+        document.getElementById('cam-section').style.display='block';
+        document.getElementById('upload-zone').style.display='none';
+        document.getElementById('mode-toggle').innerHTML='Live camera active. <a onclick="switchToUpload()">Switch to photo upload</a>';
+    }catch(err){
+        // Camera failed (HTTP/permission denied) — use upload mode
+        cameraReady = false;
+        useCamera = false;
+        document.getElementById('cam-section').style.display='none';
+        document.getElementById('upload-zone').style.display='block';
+        document.getElementById('mode-toggle').innerHTML='Camera requires HTTPS. Using photo mode. <a onclick="switchToCamera()">Try camera again</a>';
+    }
+}
+initCamera();
+
+function switchToUpload(){
+    useCamera=false;
+    document.getElementById('cam-section').style.display='none';
+    document.getElementById('upload-zone').style.display='block';
+    document.getElementById('preview-container').style.display='none';
+    capturedBlob=null;
+    document.getElementById('mode-toggle').innerHTML='Photo upload mode. <a onclick="switchToCamera()">Try live camera</a>';
+}
+
+function switchToCamera(){
+    initCamera();
+}
+
+// Handle file/photo selection
+function handleFileSelect(event){
+    const file=event.target.files[0];
+    if(!file) return;
+
+    // Show preview
+    const reader=new FileReader();
+    reader.onload=function(e){
+        document.getElementById('preview-img').src=e.target.result;
+        document.getElementById('preview-container').style.display='block';
+        document.getElementById('upload-zone').style.display='none';
+    };
+    reader.readAsDataURL(file);
+
+    // Store blob for verification
+    capturedBlob=file;
+}
+
+// Poll for pending drops
+let pendingPoll = setInterval(checkPending, 3000);
+checkPending();
+
+async function checkPending(){
+    try{
+        const r = await fetch(`${BACKEND_URL}/get_pending_info`);
+        const d = await r.json();
+        if(d.success && d.has_pending){
+            document.getElementById('pending-section').style.display='block';
+            document.getElementById('no-pending-section').style.display='none';
+            document.getElementById('status-badge').className='badge active';
+            document.getElementById('badge-text').textContent='User waiting — Ready to verify';
+            document.getElementById('exp-bin').textContent=d.expected_bin||'—';
+            document.getElementById('exp-waste').textContent=d.waste_type||'—';
+            document.getElementById('exp-time').textContent=d.timestamp||'—';
+            const colors={Blue:'#60a5fa',Green:'#4ade80',Red:'#f87171'};
+            document.getElementById('exp-bin').style.color=colors[d.expected_bin]||'#4ade80';
+        } else {
+            document.getElementById('pending-section').style.display='none';
+            document.getElementById('no-pending-section').style.display='block';
+            document.getElementById('status-badge').className='badge waiting';
+            document.getElementById('badge-text').textContent='Waiting for user to scan...';
+            document.getElementById('result-box').style.display='none';
+            resetButton();
+        }
+    }catch(e){}
+}
+
+async function verifyTrash(){
+    const btn=document.getElementById('capture-btn');
+    let blob=null;
+
+    if(useCamera && cameraReady){
+        // Capture from live camera
+        canvas.width=video.videoWidth;
+        canvas.height=video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+        blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg'));
+    } else if(capturedBlob){
+        // Use uploaded photo
+        blob = capturedBlob;
+    } else {
+        alert('Please take a photo of the trash first!');
+        return;
+    }
+
+    btn.disabled=true;
+    btn.innerHTML='<i class="fa-solid fa-spinner fa-spin" style="font-size:20px"></i> AI Analyzing...';
+
+    let formData=new FormData();
+    formData.append('image', blob, 'bin_check.jpg');
+
+    try{
+        // Step 1: AI analyzes the trash
+        let aiRes=await fetch(`${BACKEND_URL}/analyze-waste`, {method:'POST', body:formData});
+        let aiData=await aiRes.json();
+        let detectedBin=aiData.target_bin;
+
+        // Step 2: Compare with user's expected bin
+        let verifyRes=await fetch(`${BACKEND_URL}/finalize_drop`, {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({actual_bin:detectedBin})
+        });
+        let result=await verifyRes.json();
+        showResult(result);
+
+    }catch(err){
+        showResult({success:false, status:'retry', message:'Server connection failed!'});
+    }
+}
+
+function showResult(result){
+    const box=document.getElementById('result-box');
+    const btn=document.getElementById('capture-btn');
+    box.style.display='block';
+
+    if(result.status==='match'){
+        box.className='result-box match';
+        document.getElementById('result-title').textContent='✅ Match! Verified';
+        document.getElementById('result-msg').textContent=result.message||'Trash matched the expected bin. +10 points!';
+        btn.innerHTML='<i class="fa-solid fa-check-circle" style="font-size:20px"></i> Verified Successfully';
+        btn.style.background='#16a34a';
+    } else if(result.status==='mismatch'){
+        box.className='result-box mismatch';
+        document.getElementById('result-title').textContent='❌ Mismatch!';
+        document.getElementById('result-msg').textContent=result.message||'Wrong bin detected. -5 points penalty!';
+        btn.innerHTML='<i class="fa-solid fa-triangle-exclamation" style="font-size:20px"></i> Mismatch Detected';
+        btn.style.background='#dc2626';
+    } else {
+        box.className='result-box retry';
+        document.getElementById('result-title').textContent='⚠️ Could Not Identify';
+        document.getElementById('result-msg').textContent=result.message||'Please show the trash more clearly.';
+        btn.disabled=false;
+        btn.innerHTML='<i class="fa-solid fa-camera" style="font-size:20px"></i> Try Again';
+        btn.style.background='#16a34a';
+    }
+
+    // Reset after 5 seconds for next verification
+    setTimeout(()=>{
+        resetButton();
+        capturedBlob=null;
+        document.getElementById('preview-container').style.display='none';
+        if(!useCamera) document.getElementById('upload-zone').style.display='block';
+        document.getElementById('file-input').value='';
+        checkPending();
+    }, 5000);
+}
+
+function resetButton(){
+    const btn=document.getElementById('capture-btn');
+    btn.disabled=false;
+    btn.innerHTML='<i class="fa-solid fa-magnifying-glass" style="font-size:20px"></i> Verify Trash';
+    btn.style.background='#16a34a';
+}
+</script>
+</body>
+</html>

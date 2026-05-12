@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waste Buddy — Login</title>
+    <meta name="description" content="Waste Buddy - AI-Powered Smart Waste Management. Login to your account or admin dashboard.">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* ===== RESET ===== */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --green: #16a34a;
+            --green-light: #4ade80;
+            --green-dark: #0d3320;
+            --bg: #e2e8f0;
+        }
+
+        body {
+            background: var(--bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            /* Animated gradient background */
+            background: linear-gradient(135deg, #d4e4d4 0%, #c3d4d4 50%, #d4d4e4 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0%   { background-position: 0% 50%; }
+            50%  { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* ===== MOBILE FRAME ===== */
+        .mobile-frame {
+            width: 100%;
+            max-width: 400px;
+            height: 100vh;
+            max-height: 820px;
+            border-radius: 30px;
+            box-shadow: 0 30px 60px -15px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.15);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            background: #0f3822;
+        }
+
+        /* ===== HEADER ===== */
+        .login-header {
+            height: 40%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 20px 20px;
+            text-align: center;
+            color: #fff;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(180deg, #062216 0%, #0d3320 55%, #1a5c3a 100%);
+        }
+
+        .login-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(ellipse at center, rgba(74,222,128,.08) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50%       { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        /* Floating particles */
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(74,222,128,.15);
+            animation: float 6s ease-in-out infinite;
+        }
+        .particle:nth-child(1) { width:60px;height:60px;top:15%;left:8%;animation-delay:0s; }
+        .particle:nth-child(2) { width:40px;height:40px;top:50%;right:10%;animation-delay:1.5s; }
+        .particle:nth-child(3) { width:25px;height:25px;bottom:20%;left:20%;animation-delay:3s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50%       { transform: translateY(-12px) scale(1.05); }
+        }
+
+        .logo-wrap {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .logo-icon-ring {
+            width: 72px; height: 72px;
+            border-radius: 50%;
+            border: 2px solid rgba(74,222,128,.3);
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 12px;
+            position: relative;
+            animation: ringPulse 3s ease infinite;
+        }
+
+        @keyframes ringPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(74,222,128,.4); }
+            50%       { box-shadow: 0 0 0 12px rgba(74,222,128,.0); }
+        }
+
+        .logo-icon-ring i {
+            font-size: 34px;
+            color: var(--green-light);
+            filter: drop-shadow(0 2px 8px rgba(74,222,128,.5));
+            animation: spin 12s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .brand-name {
+            font-family: 'Poppins', sans-serif;
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: 3px;
+            color: #fff;
+            text-shadow: 0 2px 12px rgba(0,0,0,.4);
+        }
+
+        .tagline {
+            font-size: 13px;
+            color: rgba(255,255,255,.65);
+            margin-top: 6px;
+            letter-spacing: .5px;
+        }
+
+        /* ===== LOGIN CARD ===== */
+        .login-card {
+            flex: 1;
+            border-radius: 28px 28px 0 0;
+            padding: 28px 26px 20px;
+            display: flex;
+            flex-direction: column;
+            background: rgba(255,255,255,.97);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255,255,255,.8);
+            position: relative;
+            z-index: 3;
+            margin-top: -12px;
+            overflow-y: auto;
+        }
+
+        .login-card h2 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 21px;
+            color: #1e293b;
+            text-align: center;
+            font-weight: 700;
+            margin-bottom: 3px;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 20px;
+        }
+
+        /* ===== ROLE TOGGLE ===== */
+        .role-toggle {
+            display: flex;
+            background: #f1f5f9;
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 20px;
+        }
+
+        .role-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: transparent;
+            border-radius: 9px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+            cursor: pointer;
+            transition: all .3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .role-btn.active {
+            background: #fff;
+            color: var(--green);
+            box-shadow: 0 2px 8px rgba(0,0,0,.1);
+        }
+
+        .role-btn.admin-active {
+            background: #fff;
+            color: #1d4ed8;
+            box-shadow: 0 2px 8px rgba(0,0,0,.1);
+        }
+
+        /* ===== INPUTS ===== */
+        .input-group {
+            display: flex;
+            align-items: center;
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 13px 16px;
+            margin-bottom: 12px;
+            transition: all .3s;
+        }
+
+        .input-group:focus-within {
+            border-color: var(--green);
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(22,163,74,.1);
+        }
+
+        .input-group.admin-focus:focus-within {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+        }
+
+        .input-group i {
+            color: #94a3b8;
+            margin-right: 12px;
+            font-size: 16px;
+            min-width: 18px;
+        }
+
+        .input-group input {
+            border: none;
+            background: transparent;
+            outline: none;
+            width: 100%;
+            font-size: 14px;
+            color: #1e293b;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .input-group input::placeholder { color: #94a3b8; }
+
+        /* ===== FORGOT / HINT ===== */
+        .row-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        .hint-text {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .forgot-link {
+            font-size: 12px;
+            color: var(--green);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all .3s;
+            letter-spacing: .5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: #fff;
+            margin-bottom: 16px;
+        }
+
+        .btn-login.user-btn {
+            background: linear-gradient(135deg, #16a34a, #0d3320);
+            box-shadow: 0 6px 20px rgba(22,163,74,.35);
+        }
+
+        .btn-login.user-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(22,163,74,.45);
+        }
+
+        .btn-login.admin-btn {
+            background: linear-gradient(135deg, #2563eb, #1e40af);
+            box-shadow: 0 6px 20px rgba(37,99,235,.35);
+        }
+
+        .btn-login.admin-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(37,99,235,.45);
+        }
+
+        .btn-login:disabled {
+            opacity: .7;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* ===== DIVIDER ===== */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #e2e8f0;
+        }
+        .divider span { font-size: 12px; color: #94a3b8; white-space: nowrap; }
+
+        /* ===== SOCIAL LOGIN ===== */
+        .social-login {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .social-btn {
+            flex: 1;
+            padding: 11px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 11px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: .2s;
+        }
+
+        .social-btn:hover { background: #f8fafc; border-color: #cbd5e1; }
+
+        /* ===== SIGNUP / BOTTOM LINK ===== */
+        .bottom-link {
+            text-align: center;
+            font-size: 13px;
+            color: #64748b;
+            margin-top: auto;
+            padding-top: 6px;
+        }
+
+        .bottom-link a {
+            color: var(--green);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        /* ===== ADMIN INDICATOR ===== */
+        .admin-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(37,99,235,.08);
+            color: #2563eb;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 50px;
+            border: 1px solid rgba(37,99,235,.2);
+            margin: 0 auto 14px;
+            width: fit-content;
+        }
+
+        /* ===== ERROR MESSAGE ===== */
+        .error-msg {
+            background: rgba(239,68,68,.1);
+            color: #dc2626;
+            border: 1px solid rgba(239,68,68,.25);
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 13px;
+            font-weight: 500;
+            text-align: center;
+            margin-bottom: 12px;
+            display: none;
+            animation: shake .3s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25%       { transform: translateX(-6px); }
+            75%       { transform: translateX(6px); }
+        }
+
+        .error-msg.show { display: block; }
+
+        /* ===== LOADING SPINNER ===== */
+        .spinner-inline {
+            width: 18px; height: 18px;
+            border: 2px solid rgba(255,255,255,.4);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spinBtn .6s linear infinite;
+        }
+
+        @keyframes spinBtn { to { transform: rotate(360deg); } }
+
+        /* ===== TOGGLE PASSWORD ===== */
+        .toggle-pw { cursor: pointer; transition: color .2s; }
+        .toggle-pw:hover { color: #64748b; }
+
+        /* ===== ADMIN CREDENTIALS HINT ===== */
+        .creds-hint {
+            background: rgba(37,99,235,.06);
+            border: 1px solid rgba(37,99,235,.15);
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 11.5px;
+            color: #3b82f6;
+            margin-bottom: 14px;
+            line-height: 1.6;
+        }
+
+        .creds-hint strong { display: block; margin-bottom: 3px; }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-height: 700px) {
+            .login-header { height: 34%; }
+            .logo-icon-ring { width: 56px; height: 56px; }
+            .logo-icon-ring i { font-size: 26px; }
+            .brand-name { font-size: 22px; }
+            .login-card { padding: 20px 22px 14px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-frame">
+
+        <!-- HEADER -->
+        <div class="login-header">
+            <span class="particle"></span>
+            <span class="particle"></span>
+            <span class="particle"></span>
+            <div class="logo-wrap">
+                <div class="logo-icon-ring">
+                    <i class="fa-solid fa-recycle"></i>
+                </div>
+                <div class="brand-name">WASTE BUDDY</div>
+                <p class="tagline">Smart Waste. Clean Future.</p>
+            </div>
+        </div>
+
+        <!-- LOGIN CARD -->
+        <div class="login-card">
+            <h2 id="card-title">Welcome Back!</h2>
+            <p class="subtitle" id="card-subtitle">Login to continue</p>
+
+            <!-- ROLE TOGGLE -->
+            <div class="role-toggle">
+                <button class="role-btn active" id="btn-user" onclick="switchRole('user')">
+                    <i class="fa-solid fa-user"></i> User
+                </button>
+                <button class="role-btn" id="btn-admin" onclick="switchRole('admin')">
+                    <i class="fa-solid fa-shield-halved"></i> Admin
+                </button>
+            </div>
+
+            <!-- ADMIN BADGE (shown when admin tab selected) -->
+            <div class="admin-badge" id="admin-badge" style="display:none;">
+                <i class="fa-solid fa-lock"></i> Secure Admin Access
+            </div>
+
+            <!-- ERROR MESSAGE -->
+            <div class="error-msg" id="error-msg"></div>
+
+            <!-- LOGIN FORM -->
+            <form id="login-form" onsubmit="handleLogin(event)">
+                <div class="input-group" id="ig-email">
+                    <i class="fa-regular fa-user"></i>
+                    <input type="text" id="login-id" placeholder="Email or Phone" required autocomplete="username">
+                </div>
+                <div class="input-group" id="ig-password">
+                    <i class="fa-solid fa-lock"></i>
+                    <input type="password" id="password" placeholder="Password" required autocomplete="current-password">
+                    <i class="fa-regular fa-eye-slash toggle-pw" id="eye-icon" onclick="togglePassword()"></i>
+                </div>
+
+                <div class="row-between">
+                    <span class="hint-text" id="hint-text">New user? Create account below</span>
+                    <a href="#" class="forgot-link">Forgot Password?</a>
+                </div>
+
+                <button type="submit" class="btn-login user-btn" id="login-btn">
+                    <i class="fa-solid fa-right-to-bracket"></i>
+                    <span id="btn-text">Login</span>
+                </button>
+            </form>
+
+            <!-- USER-ONLY: Social login + signup -->
+            <div id="user-section">
+                <div class="divider"><span>or continue with</span></div>
+                <div class="social-login">
+                    <button class="social-btn" title="Google"><i class="fa-brands fa-google" style="color:#DB4437"></i></button>
+                    <button class="social-btn" title="Facebook"><i class="fa-brands fa-facebook" style="color:#1877F2"></i></button>
+                    <button class="social-btn" title="Apple"><i class="fa-brands fa-apple" style="color:#333"></i></button>
+                </div>
+                <div class="bottom-link">
+                    Don't have an account? <a href="signup.html">Sign Up</a>
+                </div>
+            </div>
+
+            <!-- ADMIN-ONLY: Help section -->
+            <div id="admin-section" style="display:none;">
+                <div class="bottom-link" style="margin-top: 20px;">
+                    Not an admin? <a href="#" onclick="switchRole('user');return false;">User Login →</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script>
+        // ===== ROLE STATE =====
+        let currentRole = 'user';
+
+        function switchRole(role) {
+            currentRole = role;
+            const isAdmin = role === 'admin';
+
+            // Toggle buttons
+            document.getElementById('btn-user').className  = 'role-btn' + (isAdmin ? '' : ' active');
+            document.getElementById('btn-admin').className = 'role-btn' + (isAdmin ? ' admin-active' : '');
+
+            // Card text
+            document.getElementById('card-title').textContent    = isAdmin ? 'Admin Login'    : 'Welcome Back!';
+            document.getElementById('card-subtitle').textContent = isAdmin ? 'Access admin dashboard' : 'Login to continue';
+
+            // Admin badge
+            document.getElementById('admin-badge').style.display = isAdmin ? 'flex' : 'none';
+
+            // Sections
+            document.getElementById('user-section').style.display  = isAdmin ? 'none'  : 'block';
+            document.getElementById('admin-section').style.display = isAdmin ? 'block' : 'none';
+
+            // Hint text
+            document.getElementById('hint-text').textContent = isAdmin ? 'Admin credentials required' : 'New user? Create account below';
+
+            // Login button style
+            const btn = document.getElementById('login-btn');
+            btn.className = isAdmin ? 'btn-login admin-btn' : 'btn-login user-btn';
+
+            // Input accent
+            const igEmail = document.getElementById('ig-email');
+            const igPw    = document.getElementById('ig-password');
+            if (isAdmin) {
+                igEmail.classList.add('admin-focus');
+                igPw.classList.add('admin-focus');
+            } else {
+                igEmail.classList.remove('admin-focus');
+                igPw.classList.remove('admin-focus');
+            }
+
+            // Placeholder hint
+            document.getElementById('login-id').placeholder = isAdmin ? 'Admin email or username' : 'Email or Phone';
+
+            clearError();
+        }
+
+        // ===== TOGGLE PASSWORD =====
+        function togglePassword() {
+            const p = document.getElementById('password');
+            const e = document.getElementById('eye-icon');
+            if (p.type === 'password') {
+                p.type = 'text';
+                e.classList.replace('fa-eye-slash', 'fa-eye');
+            } else {
+                p.type = 'password';
+                e.classList.replace('fa-eye', 'fa-eye-slash');
+            }
+        }
+
+        // ===== ERROR HELPERS =====
+        function showError(msg) {
+            const el = document.getElementById('error-msg');
+            el.textContent = msg;
+            el.classList.add('show');
+        }
+        function clearError() {
+            document.getElementById('error-msg').classList.remove('show');
+        }
+
+        // ===== LOGIN HANDLER =====
+        async function handleLogin(event) {
+            event.preventDefault();
+            clearError();
+
+            const loginId  = document.getElementById('login-id').value.trim();
+            const password = document.getElementById('password').value.trim();
+
+            if (!loginId || !password) {
+                showError('Please fill in all fields.');
+                return;
+            }
+
+            const btn     = document.getElementById('login-btn');
+            const btnText = document.getElementById('btn-text');
+            btn.disabled  = true;
+            btnText.textContent = '';
+            btn.innerHTML = '<div class="spinner-inline"></div>';
+
+            try {
+                const res  = await fetch(`${BACKEND_URL}/login`, {
+                    method:  'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body:    JSON.stringify({ email: loginId, password })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    if (data.role === 'admin') {
+                        // ── ADMIN → open admin dashboard ──
+                        localStorage.setItem('admin_logged_in', 'true');
+                        localStorage.setItem('admin_name',  data.user_name);
+                        localStorage.setItem('admin_email', data.email);
+                        window.location.href = 'admin.html';
+                    } else {
+                        // ── USER → open user app ──
+                        localStorage.setItem('user_full_name',    data.user_name);
+                        localStorage.setItem('user_login_id',     loginId);
+                        localStorage.setItem('user_email',        data.email || loginId);
+                        localStorage.setItem('user_points',       data.points);
+                        localStorage.setItem('user_total_scans',  data.total_scans  || 0);
+                        localStorage.setItem('user_verified_count', data.verified_count || 0);
+                        window.location.href = 'home.html';
+                    }
+                } else {
+                    showError(data.message || 'Invalid credentials. Please try again.');
+                }
+            } catch (e) {
+                console.error(e);
+                showError('Cannot connect to server. Make sure the backend is running.');
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = `<i class="fa-solid fa-right-to-bracket"></i><span id="btn-text">Login</span>`;
+        }
+    </script>
+</body>
+</html>

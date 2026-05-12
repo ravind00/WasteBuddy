@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Waste Buddy — Admin Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="css/admin.css">
+  <style>
+    /* ===== ROUTE MAP OVERRIDES ===== */
+    .route-map-wrap { border-radius: 12px; overflow: hidden; border: 1px solid var(--border); margin-bottom:16px; position:relative; }
+    #bhopalRouteMap { height: 420px; width: 100%; background:#0a1e2c; }
+    .leaflet-container { background: #0d1f2d; font-family:'Inter',sans-serif; }
+    .route-layout { display:grid; grid-template-columns:1fr 320px; gap:16px; align-items:start; }
+    .route-sidebar { display:flex; flex-direction:column; gap:12px; }
+    .route-controls { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px; }
+    .driver-selector { display:flex; flex-direction:column; gap:8px; margin-bottom:12px; }
+    .driver-opt { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:8px; cursor:pointer; border:1px solid var(--border); background:var(--card2); transition:.2s; font-size:13px; }
+    .driver-opt:hover { border-color:var(--green); background:rgba(34,197,94,.06); }
+    .driver-opt.selected { border-color:var(--green); background:rgba(34,197,94,.1); color:var(--green); font-weight:600; }
+    .driver-opt .dot { width:10px;height:10px;border-radius:50%;flex-shrink:0; }
+    .bin-stop-list { display:flex; flex-direction:column; gap:6px; max-height:200px; overflow-y:auto; }
+    .bin-stop { display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:7px; background:var(--card2); border:1px solid var(--border); font-size:12px; }
+    .bin-stop .stop-num { width:22px;height:22px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0; }
+    .bin-stop .fill-chip { margin-left:auto; padding:2px 7px; border-radius:50px; font-size:10px; font-weight:700; }
+    .fill-chip.red-chip   { background:rgba(239,68,68,.15);  color:var(--red); }
+    .fill-chip.yel-chip   { background:rgba(245,158,11,.15); color:var(--yellow); }
+    .fill-chip.grn-chip   { background:rgba(34,197,94,.15);  color:var(--green); }
+    .route-stat-row { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+    .btn-start-route { width:100%; padding:13px; background:linear-gradient(135deg,var(--green),#16a34a); border:none; color:#fff; border-radius:10px; font-size:14px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; transition:.2s; }
+    .btn-start-route:hover { opacity:.9; transform:translateY(-1px); }
+    .btn-stop-route  { width:100%; padding:13px; background:linear-gradient(135deg,var(--red),#b91c1c); border:none; color:#fff; border-radius:10px; font-size:14px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; transition:.2s; }
+    .btn-stop-route:hover { opacity:.9; }
+    .route-status-bar { display:flex; align-items:center; gap:8px; padding:10px 12px; border-radius:8px; font-size:13px; font-weight:500; }
+    .route-status-bar.idle    { background:rgba(100,116,139,.1); color:var(--muted); }
+    .route-status-bar.running { background:rgba(34,197,94,.1);  color:var(--green); }
+    .truck-pulse { width:10px;height:10px;border-radius:50%;background:var(--green);animation:truckPulse 1s ease infinite; }
+    @keyframes truckPulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:.4;transform:scale(.7);} }
+    @media(max-width:900px){ .route-layout{grid-template-columns:1fr;} #bhopalRouteMap{height:300px;} }
+  </style>
+</head>
+<body>
+
+  <!-- ===== MAIN APP ===== -->
+  <div id="mainApp" class="app-container">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-icon-sm"><i class="fas fa-recycle"></i></div>
+        <div>
+          <h2>WASTE BUDDY</h2>
+          <span>Admin Dashboard</span>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <ul>
+          <li class="nav-item active" data-page="dashboard" id="nav-dashboard"><i class="fas fa-th-large"></i><span>Dashboard</span></li>
+          <li class="nav-item" data-page="bins" id="nav-bins"><i class="fas fa-trash-alt"></i><span>Bins</span></li>
+          <li class="nav-item" data-page="collections" id="nav-collections"><i class="fas fa-truck"></i><span>Collections</span></li>
+          <li class="nav-item" data-page="routes" id="nav-routes"><i class="fas fa-route"></i><span>Routes</span></li>
+          <li class="nav-item" data-page="alerts" id="nav-alerts"><i class="fas fa-bell"></i><span>Alerts</span><span class="badge" id="alertBadge">3</span></li>
+          <li class="nav-item" data-page="users" id="nav-users"><i class="fas fa-users"></i><span>App Users</span></li>
+          <li class="nav-item" data-page="reports" id="nav-reports"><i class="fas fa-chart-line"></i><span>Reports</span></li>
+          <li class="nav-item" data-page="settings" id="nav-settings"><i class="fas fa-cog"></i><span>Settings</span></li>
+        </ul>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="sidebar-profile" id="openProfileBtn">
+          <div class="avatar-sm"><i class="fas fa-user"></i></div>
+          <div>
+            <p class="profile-name" id="sidebarAdminName">Admin</p>
+            <span class="profile-role">Administrator</span>
+          </div>
+        </div>
+        <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+      <!-- DASHBOARD PAGE -->
+      <section id="dashboard" class="page active-page">
+        <div class="page-header">
+          <div>
+            <h1 id="dashGreeting">Welcome back, Admin 👋</h1>
+            <p>Smart Waste Management System</p>
+          </div>
+          <div class="header-right">
+            <span class="datetime" id="datetimeDisplay"></span>
+            <button class="icon-btn"><i class="fas fa-bell"></i></button>
+          </div>
+        </div>
+
+        <!-- Live stats from backend -->
+        <div class="stats-grid" id="liveStatsGrid">
+          <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-users"></i></div><div><p>App Users</p><h2 id="statTotalUsers">-</h2></div></div>
+          <div class="stat-card"><div class="stat-icon green"><i class="fas fa-camera"></i></div><div><p>Total Scans</p><h2 id="statTotalScans">-</h2></div></div>
+          <div class="stat-card"><div class="stat-icon yellow"><i class="fas fa-check-circle"></i></div><div><p>Verified Drops</p><h2 id="statVerified">-</h2></div></div>
+          <div class="stat-card"><div class="stat-icon red"><i class="fas fa-star"></i></div><div><p>Points Awarded</p><h2 id="statPoints">-</h2></div></div>
+        </div>
+
+        <div class="stats-grid" style="margin-top:0">
+          <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-trash-alt"></i></div><div><p>Total Bins</p><h2 id="statTotalBins">12</h2></div></div>
+          <div class="stat-card"><div class="stat-icon red"><i class="fas fa-exclamation-triangle"></i></div><div><p>Active Alerts</p><h2 id="statActiveAlerts">3</h2></div></div>
+          <div class="stat-card"><div class="stat-icon green"><i class="fas fa-truck"></i></div><div><p>Collections</p><h2 id="statTotalCollections">45</h2></div></div>
+          <div class="stat-card"><div class="stat-icon yellow"><i class="fas fa-battery-three-quarters"></i></div><div><p>Avg Fill Level</p><h2 id="statAvgFill">62%</h2></div></div>
+        </div>
+
+        <div class="dashboard-grid">
+          <div class="card-box"><h3 class="box-title">Bin Status</h3><div class="bins-mini-grid" id="dashboardBinGrid"></div></div>
+          <div class="card-box"><h3 class="box-title">Recent Alerts</h3><div id="dashboardAlerts"></div><a href="#" class="view-all-link" data-page="alerts">View All Alerts →</a></div>
+        </div>
+      </section>
+
+      <!-- BINS PAGE -->
+      <section id="bins" class="page">
+        <div class="page-header">
+          <h1>Bins Management</h1>
+          <button class="btn-primary" id="openAddBinBtn"><i class="fas fa-plus"></i> Add New Bin</button>
+        </div>
+        <div class="filter-bar">
+          <div class="search-box"><i class="fas fa-search"></i><input type="text" id="binSearch" placeholder="Search bins..."></div>
+          <select id="binStatusFilter" class="select-input">
+            <option value="all">All Status</option>
+            <option value="critical">Critical</option>
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
+        <div class="table-card">
+          <table><thead><tr><th>Bin ID</th><th>Location</th><th>Fill Level</th><th>Status</th><th>Last Updated</th><th>Action</th></tr></thead>
+          <tbody id="binsTableBody"></tbody></table>
+        </div>
+      </section>
+
+      <!-- COLLECTIONS PAGE -->
+      <section id="collections" class="page">
+        <div class="page-header">
+          <h1>Collections</h1>
+          <button class="btn-primary" id="openNewCollectionBtn"><i class="fas fa-plus"></i> New Collection</button>
+        </div>
+        <div class="filter-bar">
+          <div class="search-box"><i class="fas fa-search"></i><input type="text" id="collectionSearch" placeholder="Search collection..."></div>
+          <select id="collectionStatusFilter" class="select-input">
+            <option value="all">All</option><option value="completed">Completed</option>
+            <option value="in-progress">In Progress</option><option value="pending">Pending</option>
+          </select>
+        </div>
+        <div class="table-card">
+          <table><thead><tr><th>Collection ID</th><th>Route</th><th>Driver</th><th>Status</th><th>Time</th><th>Action</th></tr></thead>
+          <tbody id="collectionsTableBody"></tbody></table>
+        </div>
+      </section>
+
+      <!-- ROUTES PAGE -->
+      <section id="routes" class="page">
+        <div class="page-header">
+          <h1>Route Optimization — Bhopal</h1>
+          <span class="driver-badge" id="routeDriverLabel" style="font-size:13px;padding:6px 14px">Select Driver →</span>
+        </div>
+
+        <div class="route-layout">
+
+          <!-- LEFT: MAP -->
+          <div>
+            <div class="route-map-wrap">
+              <div id="bhopalRouteMap"></div>
+            </div>
+            <!-- Route stop sequence strip -->
+            <div class="card-box" style="padding:14px 16px">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+                <span style="font-size:13px;font-weight:600">Optimal Stop Order</span>
+                <span id="routeSeqStatus" style="font-size:12px;color:var(--muted)">Select driver &amp; click Start</span>
+              </div>
+              <div class="route-sequence" id="routeSequence" style="flex-wrap:wrap;gap:6px"></div>
+            </div>
+          </div>
+
+          <!-- RIGHT: CONTROLS -->
+          <div class="route-sidebar">
+
+            <!-- Driver Selector -->
+            <div class="route-controls">
+              <h3 class="box-title" style="margin-bottom:12px">Select Driver</h3>
+              <div class="driver-selector">
+                <div class="driver-opt selected" data-driver="1" onclick="selectDriver(1)">
+                  <span class="dot" style="background:#22c55e"></span>
+                  <i class="fas fa-truck" style="color:#22c55e"></i> Driver 1 — Route A
+                </div>
+                <div class="driver-opt" data-driver="2" onclick="selectDriver(2)">
+                  <span class="dot" style="background:#3b82f6"></span>
+                  <i class="fas fa-truck" style="color:#3b82f6"></i> Driver 2 — Route B
+                </div>
+                <div class="driver-opt" data-driver="3" onclick="selectDriver(3)">
+                  <span class="dot" style="background:#f59e0b"></span>
+                  <i class="fas fa-truck" style="color:#f59e0b"></i> Driver 3 — Route C
+                </div>
+              </div>
+
+              <!-- Route Stats -->
+              <div class="route-stat-row">
+                <div class="route-stat"><p>Distance</p><h3 id="routeDist">—</h3></div>
+                <div class="route-stat yellow"><p>Est. Time</p><h3 id="routeTime">—</h3></div>
+                <div class="route-stat green"><p>Fuel Save</p><h3 id="routeFuel">—</h3></div>
+              </div>
+            </div>
+
+            <!-- Bin Stop List -->
+            <div class="route-controls">
+              <h3 class="box-title" style="margin-bottom:10px">Bins on Route</h3>
+              <div class="bin-stop-list" id="binStopList">
+                <p style="color:var(--muted);font-size:12px;text-align:center;padding:10px">Select a driver to see bins</p>
+              </div>
+            </div>
+
+            <!-- Status + Actions -->
+            <div class="route-controls">
+              <div class="route-status-bar idle" id="routeStatusBar">
+                <span class="truck-pulse" style="background:var(--muted)"></span>
+                <span id="routeStatusText">Route not started</span>
+              </div>
+              <button class="btn-start-route mt-16" id="startRouteBtn">
+                <i class="fas fa-play"></i> Start Route
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- ALERTS PAGE -->
+      <section id="alerts" class="page">
+        <div class="page-header"><h1>Alerts</h1></div>
+        <div class="tab-bar">
+          <button class="tab active-tab" data-filter="all">All</button>
+          <button class="tab" data-filter="critical">Critical</button>
+          <button class="tab" data-filter="warning">Warning</button>
+          <button class="tab" data-filter="info">Info</button>
+        </div>
+        <div id="alertsList"></div>
+      </section>
+
+      <!-- USERS PAGE (App Users from Backend) -->
+      <section id="users" class="page">
+        <div class="page-header">
+          <h1>App Users</h1>
+          <button class="btn-primary" id="refreshUsersBtn"><i class="fas fa-sync-alt"></i> Refresh</button>
+        </div>
+        <div class="filter-bar">
+          <div class="search-box"><i class="fas fa-search"></i><input type="text" id="userSearch" placeholder="Search users..."></div>
+        </div>
+        <div class="table-card">
+          <table>
+            <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Points</th><th>Scans</th><th>Verified</th><th>Joined</th><th>Action</th></tr></thead>
+            <tbody id="usersTableBody"><tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted)">Loading users...</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- REPORTS PAGE -->
+      <section id="reports" class="page">
+        <div class="page-header">
+          <div><h1>Reports</h1><p id="reportDateRange">Loading...</p></div>
+          <button class="btn-outline" id="exportReportBtn"><i class="fas fa-download"></i> Export</button>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-icon green"><i class="fas fa-truck"></i></div><div><p>Total Collections</p><h2>45</h2></div></div>
+          <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-road"></i></div><div><p>Total Distance</p><h2>189.6 km</h2></div></div>
+          <div class="stat-card"><div class="stat-icon yellow"><i class="fas fa-gas-pump"></i></div><div><p>Fuel Saved</p><h2>18.7 L</h2></div></div>
+          <div class="stat-card"><div class="stat-icon red"><i class="fas fa-tachometer-alt"></i></div><div><p>Efficiency</p><h2>20%</h2></div></div>
+        </div>
+        <div class="card-box">
+          <h3 class="box-title">Collections Over Time</h3>
+          <canvas id="collectionsChart" height="100"></canvas>
+        </div>
+      </section>
+
+      <!-- SETTINGS PAGE -->
+      <section id="settings" class="page">
+        <div class="page-header"><h1>Settings</h1></div>
+        <div class="settings-layout">
+          <div class="settings-sidebar">
+            <ul>
+              <li class="settings-nav active-settings" data-settings="general"><i class="fas fa-sliders-h"></i> General</li>
+              <li class="settings-nav" data-settings="notifications"><i class="fas fa-bell"></i> Notifications</li>
+              <li class="settings-nav" data-settings="security"><i class="fas fa-shield-alt"></i> Security</li>
+              <li class="settings-nav" data-settings="system"><i class="fas fa-server"></i> System</li>
+            </ul>
+          </div>
+          <div class="settings-body">
+            <div id="settings-general" class="settings-panel active-panel">
+              <h3>General Settings</h3>
+              <div class="form-row"><label>City Name</label><input type="text" class="text-input" value="Bhopal"></div>
+              <div class="form-row"><label>Time Zone</label><select class="select-input"><option>(GMT+05:30) Asia/Kolkata</option><option>(GMT+00:00) UTC</option></select></div>
+              <div class="form-row"><label>Language</label><select class="select-input"><option>English</option><option>Hindi</option></select></div>
+              <div class="form-row"><label>Admin Phone</label><input type="text" class="text-input" id="settingsPhone" value="9999999999"></div>
+              <button class="btn-primary mt-16" id="saveSettingsBtn">Save Changes</button>
+            </div>
+            <div id="settings-notifications" class="settings-panel">
+              <h3>Notification Settings</h3>
+              <div class="toggle-row"><span>Email Alerts</span><label class="toggle"><input type="checkbox" checked><span class="slider"></span></label></div>
+              <div class="toggle-row"><span>SMS Alerts</span><label class="toggle"><input type="checkbox"><span class="slider"></span></label></div>
+              <div class="toggle-row"><span>Push Notifications</span><label class="toggle"><input type="checkbox" checked><span class="slider"></span></label></div>
+              <button class="btn-primary mt-16">Save Changes</button>
+            </div>
+            <div id="settings-security" class="settings-panel">
+              <h3>Security Settings</h3>
+              <div class="form-row"><label>Change Admin Password</label><input type="password" class="text-input" id="newAdminPw" placeholder="New password"></div>
+              <button class="btn-primary mt-16" id="changePwBtn">Update Password</button>
+            </div>
+            <div id="settings-system" class="settings-panel">
+              <h3>System Info</h3>
+              <div class="form-row"><label>System Version</label><input type="text" class="text-input" value="v2.4.1" readonly></div>
+              <div class="form-row"><label>Backend URL</label><input type="text" class="text-input" id="settingsBackend" readonly></div>
+              <div class="form-row"><label>Last Backup</label><input type="text" class="text-input" id="lastBackupField" readonly></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- BIN DETAILS MODAL -->
+  <div id="binDetailsModal" class="modal-overlay hidden">
+    <div class="modal-card wide">
+      <div class="modal-topbar">
+        <button class="modal-close icon-btn" id="closeBinDetails"><i class="fas fa-arrow-left"></i></button>
+        <h2>Bin Details</h2>
+      </div>
+      <div class="bin-detail-body">
+        <div class="bin-detail-header">
+          <div class="bin-icon-large"><i class="fas fa-trash-alt"></i></div>
+          <div><h2 id="detailBinId">Bin #2</h2><span class="status-badge red" id="detailStatus">Full</span></div>
+        </div>
+        <p class="fill-label">Fill Level</p>
+        <div class="fill-bar-large"><div id="detailFillBar" style="width:85%"></div></div>
+        <p id="detailFillPct" class="fill-pct">85%</p>
+        <div class="detail-info-grid">
+          <div><span>Last Updated</span><p id="detailLastUpdated">2 minutes ago</p></div>
+          <div><span>Location</span><p id="detailLocation">MG Road, Bhopal</p></div>
+        </div>
+        <div class="alert-banner" id="detailAlertBanner">
+          <i class="fas fa-exclamation-triangle"></i>
+          <div><strong>Alert: Bin is 80%+ full!</strong><p>Immediate action required.</p></div>
+        </div>
+        <button class="btn-primary full-width mt-16" id="detailMarkCollected"><i class="fas fa-check-circle"></i> Mark as Collected</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD BIN MODAL -->
+  <div id="addBinModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-topbar">
+        <button class="modal-close icon-btn" id="closeAddBin"><i class="fas fa-arrow-left"></i></button>
+        <h2 id="addBinTitle">Add New Bin</h2>
+      </div>
+      <form id="addBinForm">
+        <div class="form-row"><label>Bin ID</label><input type="text" class="text-input" id="formBinId" placeholder="e.g. Bin 7" required></div>
+        <div class="form-row"><label>Location</label><input type="text" class="text-input" id="formBinLocation" placeholder="Enter location" required></div>
+        <div class="form-row"><label>Status</label><select class="select-input" id="formBinStatus"><option>Active</option><option>Inactive</option></select></div>
+        <button type="submit" class="btn-primary full-width mt-16">Save Bin</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- PROFILE MODAL -->
+  <div id="profileModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-topbar">
+        <button class="modal-close icon-btn" id="closeProfile"><i class="fas fa-times"></i></button>
+        <h2>Admin Profile</h2>
+      </div>
+      <div class="profile-body">
+        <div class="profile-avatar-area">
+          <div class="avatar-xl"><i class="fas fa-user-tie"></i></div>
+          <span class="avatar-edit"><i class="fas fa-camera"></i></span>
+        </div>
+        <h2 class="profile-name-lg" id="profileNameLg">Admin</h2>
+        <p class="profile-role-lg">Administrator</p>
+        <div class="profile-info">
+          <div class="profile-info-row"><i class="fas fa-envelope"></i><span id="profileEmail">admin@wastebuddy.com</span></div>
+          <div class="profile-info-row"><i class="fas fa-phone"></i><span>9999999999</span></div>
+          <div class="profile-info-row"><i class="fas fa-calendar"></i><span>Joined On: 01 Jan 2025</span></div>
+        </div>
+        <button class="btn-primary full-width mt-16" id="editProfileBtn">Edit Profile</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast" class="toast hidden"></div>
+
+  <!-- FEATURE BAR -->
+  <div class="feature-bar" id="featureBar">
+    <div class="feature-item"><i class="fas fa-robot"></i><div><strong>AI Waste Classification</strong><small>Smart & Accurate</small></div></div>
+    <div class="feature-item"><i class="fas fa-satellite-dish"></i><div><strong>Real-time Monitoring</strong><small>Live Bin Status</small></div></div>
+    <div class="feature-item"><i class="fas fa-truck"></i><div><strong>Optimized Collection</strong><small>Save Time & Fuel</small></div></div>
+    <div class="feature-item"><i class="fas fa-leaf"></i><div><strong>Clean & Green Future</strong><small>Better Tomorrow</small></div></div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

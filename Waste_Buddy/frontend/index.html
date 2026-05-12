@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waste Buddy - Login</title>
+    <meta name="description" content="Waste Buddy - AI-Powered Smart Waste Management. Login to your account.">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{background:#e2e8f0;display:flex;justify-content:center;align-items:center;min-height:100vh;font-family:'Inter',sans-serif}
+        .mobile-frame{width:100%;max-width:400px;height:100vh;max-height:820px;border-radius:30px;box-shadow:0 25px 50px -12px rgba(0,0,0,.5);display:flex;flex-direction:column;overflow:hidden;position:relative;background:#1a3a2a}
+
+        /* Header with image */
+        .login-header{
+            height:42%;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+            padding-top:35px;text-align:center;color:#fff;position:relative;overflow:hidden;
+            background:linear-gradient(180deg,#0d3320 0%,#1a5c3a 60%,#2a7a4a 100%);
+        }
+        .login-header::after{
+            content:'';position:absolute;top:0;left:0;width:100%;height:100%;
+            background:url('images/login_bg.png') center center / cover no-repeat;
+        }
+        .recycle-icon{font-size:52px;color:#4ade80;margin-bottom:8px;position:relative;z-index:2;filter:drop-shadow(0 2px 8px rgba(74,222,128,.3))}
+        .brand-name{font-family:'Poppins',sans-serif;font-size:28px;font-weight:800;letter-spacing:2px;position:relative;z-index:2;text-shadow:0 2px 8px rgba(0,0,0,.3)}
+        .tagline{font-size:13px;opacity:.85;margin-top:6px;position:relative;z-index:2;letter-spacing:.5px;font-weight:500}
+
+        /* Login card */
+        .login-card{
+            flex:1;border-radius:28px 28px 0 0;padding:30px 28px 20px;display:flex;flex-direction:column;
+            background:rgba(180,210,190,.25);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+            border-top:1px solid rgba(255,255,255,.2);position:relative;z-index:3;margin-top:-10px;
+        }
+        .login-card h2{font-family:'Poppins',sans-serif;font-size:22px;color:#fff;text-align:center;font-weight:700}
+        .subtitle{text-align:center;font-size:13px;color:rgba(255,255,255,.6);margin:4px 0 22px}
+        .input-group{display:flex;align-items:center;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.15);border-radius:14px;padding:13px 16px;margin-bottom:12px;transition:.3s}
+        .input-group:focus-within{border-color:rgba(74,222,128,.5);box-shadow:0 0 0 3px rgba(74,222,128,.1)}
+        .input-group i{color:rgba(255,255,255,.4);margin-right:12px;font-size:17px;min-width:20px}
+        .input-group input{border:none;background:transparent;outline:none;width:100%;font-size:14px;color:#fff}
+        .input-group input::placeholder{color:rgba(255,255,255,.35)}
+        .forgot-password{text-align:right;margin-bottom:20px}
+        .forgot-password a{color:rgba(74,222,128,.8);font-size:13px;text-decoration:none;font-weight:500}
+        .btn-primary{width:100%;padding:15px;background:#16a34a;color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;transition:.3s;letter-spacing:.5px}
+        .btn-primary:hover{background:#15803d;transform:translateY(-1px)}
+        .divider{display:flex;align-items:center;margin:18px 0;gap:12px}
+        .divider::before,.divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.15)}
+        .divider span{color:rgba(255,255,255,.4);font-size:12px;white-space:nowrap}
+        .social-login{display:flex;gap:12px;margin-bottom:16px}
+        .social-btn{flex:1;padding:12px;border:1.5px solid rgba(255,255,255,.15);border-radius:12px;background:rgba(255,255,255,.06);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:.3s}
+        .social-btn:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25)}
+        .signup-link{text-align:center;font-size:13px;color:rgba(255,255,255,.5);margin-top:auto;padding-top:8px}
+        .signup-link a{color:#4ade80;font-weight:600;text-decoration:none}
+        .toggle-password{cursor:pointer}
+    </style>
+</head>
+<body>
+    <div class="mobile-frame">
+        <div class="login-header">
+            <i class="fa-solid fa-recycle recycle-icon"></i>
+            <div class="brand-name">WASTE BUDDY</div>
+            <p class="tagline">Smart Waste. Clean Future.</p>
+        </div>
+        <div class="login-card">
+            <h2>Welcome Back!</h2>
+            <p class="subtitle">Login to continue</p>
+            <form id="login-form">
+                <div class="input-group">
+                    <i class="fa-regular fa-user"></i>
+                    <input type="text" id="login-id" placeholder="Email or Phone" required>
+                </div>
+                <div class="input-group">
+                    <i class="fa-solid fa-lock"></i>
+                    <input type="password" id="password" placeholder="Password" required>
+                    <i class="fa-regular fa-eye-slash toggle-password" id="eye-icon" onclick="togglePassword()" style="color:rgba(255,255,255,.35)"></i>
+                </div>
+                <div class="forgot-password"><a href="#">Forgot Password?</a></div>
+                <button type="button" class="btn-primary" id="login-btn" onclick="handleLogin(event)">Login</button>
+            </form>
+            <div class="divider"><span>or continue with</span></div>
+            <div class="social-login">
+                <button class="social-btn"><i class="fa-brands fa-google" style="color:#DB4437"></i></button>
+                <button class="social-btn"><i class="fa-brands fa-facebook" style="color:#1877F2"></i></button>
+                <button class="social-btn"><i class="fa-brands fa-apple" style="color:#fff"></i></button>
+            </div>
+            <div class="signup-link">Don't have an account? <a href="signup.html">Sign Up</a></div>
+        </div>
+    </div>
+<script src="js/config.js"></script>
+<script>
+async function handleLogin(event){
+    event.preventDefault();
+    const loginId=document.getElementById('login-id').value.trim();
+    const password=document.getElementById('password').value.trim();
+    if(!loginId||!password){alert("Please enter both Email/Phone and Password!");return}
+    const btn=document.getElementById('login-btn');
+    btn.textContent='Logging in...';btn.disabled=true;
+    try{
+        const res=await fetch(`${BACKEND_URL}/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:loginId,password})});
+        const data=await res.json();
+        if(data.success){
+            localStorage.setItem('user_full_name',data.user_name);
+            localStorage.setItem('user_login_id',loginId);
+            localStorage.setItem('user_email',data.email||loginId);
+            localStorage.setItem('user_points',data.points);
+            localStorage.setItem('user_total_scans',data.total_scans||0);
+            localStorage.setItem('user_verified_count',data.verified_count||0);
+            window.location.href="home.html";
+        }else{alert(data.message||"Invalid credentials!")}
+    }catch(e){console.error(e);alert("Server connection failed!")}
+    btn.textContent='Login';btn.disabled=false;
+}
+function togglePassword(){
+    const p=document.getElementById('password'),e=document.getElementById('eye-icon');
+    if(p.type==='password'){p.type='text';e.classList.remove('fa-eye-slash');e.classList.add('fa-eye')}
+    else{p.type='password';e.classList.remove('fa-eye');e.classList.add('fa-eye-slash')}
+}
+</script>
+</body>
+</html>

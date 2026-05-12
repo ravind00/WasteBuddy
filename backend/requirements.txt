@@ -1,0 +1,9 @@
+flask
+flask-cors
+tensorflow
+pillow
+numpy
+gunicorn
+pymongo
+python-dotenv
+dnspython

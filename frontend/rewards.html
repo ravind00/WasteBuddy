@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waste Buddy - Rewards</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="mobile-frame rewards-page">
+        <div class="page-header">
+            <a href="home.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i></a>
+            <h2>My Rewards</h2>
+        </div>
+        <div class="rewards-hero">
+            <div class="label">Total Points</div>
+            <div class="points" id="rw-points">0 <span>PTS</span></div>
+            <button class="redeem-btn" onclick="redeemPoints()">
+                <i class="fa-solid fa-gift" style="margin-right:4px"></i> Redeem Points
+            </button>
+        </div>
+        <div class="section-title">Recent Transactions</div>
+        <div class="txn-list" id="txn-list">
+            <div class="empty-msg">Loading transactions...</div>
+        </div>
+        <div class="bottom-nav">
+            <a href="home.html" class="nav-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
+            <a href="history.html" class="nav-item"><i class="fa-solid fa-clock-rotate-left"></i><span>Scan History</span></a>
+            <a href="bin_location.html" class="nav-item"><i class="fa-solid fa-location-dot"></i><span>Bin Location</span></a>
+            <a href="rewards.html" class="nav-item active"><i class="fa-solid fa-gift"></i><span>Rewards</span></a>
+            <a href="profile.html" class="nav-item"><i class="fa-solid fa-user"></i><span>Profile</span></a>
+        </div>
+    </div>
+<script src="js/config.js"></script>
+<script>
+async function loadRewards(){
+    const id=localStorage.getItem('user_login_id');
+    if(!id){document.getElementById('txn-list').innerHTML='<div class="empty-msg">Please login first.</div>';return}
+    try{
+        const r=await fetch(`${BACKEND_URL}/get_rewards?login_id=${id}`);
+        const d=await r.json();
+        if(d.success){
+            document.getElementById('rw-points').innerHTML=d.points+' <span>PTS</span>';
+            localStorage.setItem('user_points',d.points);
+            const el=document.getElementById('txn-list');
+            if(!d.transactions||d.transactions.length===0){el.innerHTML='<div class="empty-msg">No transactions yet.</div>';return}
+            el.innerHTML='';
+            d.transactions.forEach(t=>{
+                const isPlus=!(t.points||'').includes('-');
+                el.innerHTML+=`<div class="txn-card">
+                    <div class="txn-info"><h4>${t.description||'Transaction'}</h4><p>${t.date||''}</p></div>
+                    <div class="txn-pts" style="color:${isPlus?'#059669':'#dc2626'}">${t.points||''}</div>
+                </div>`;
+            });
+        }
+    }catch(e){document.getElementById('txn-list').innerHTML='<div class="empty-msg">Connection failed.</div>'}
+}
+
+async function redeemPoints(){
+    const pts=parseInt(localStorage.getItem('user_points')||'0');
+    if(pts<50){alert("You need at least 50 points to redeem!");return}
+    const amount=prompt(`You have ${pts} points. How many points to redeem? (min 50)`);
+    if(!amount||isNaN(amount)||parseInt(amount)<50){alert("Enter a valid amount (min 50)");return}
+    const id=localStorage.getItem('user_login_id');
+    try{
+        const r=await fetch(`${BACKEND_URL}/redeem_points`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({login_id:id,amount:parseInt(amount),reward_name:'Points Redeemed'})});
+        const d=await r.json();
+        if(d.success){alert(d.message);localStorage.setItem('user_points',d.new_points);loadRewards()}
+        else{alert(d.message)}
+    }catch(e){alert("Connection failed!")}
+}
+
+window.onload=loadRewards;
+</script>
+</body>
+</html>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waste Buddy - Bin Location</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+    <div class="mobile-frame bin-loc-page">
+        <div class="page-header">
+            <a href="home.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i></a>
+            <h2>Nearest Bins</h2>
+        </div>
+        <div class="bin-map-container">
+            <div id="bin-map" style="height:100%;width:100%;z-index:1"></div>
+        </div>
+        <div id="highlight-banner" style="display:none;margin:0 20px 10px;padding:12px 16px;border-radius:12px;z-index:1;text-align:center;font-size:14px;font-weight:600;color:#fff"></div>
+        <div class="bins-list" id="bins-list"></div>
+        <div class="bottom-nav">
+            <a href="home.html" class="nav-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
+            <a href="history.html" class="nav-item"><i class="fa-solid fa-clock-rotate-left"></i><span>Scan History</span></a>
+            <a href="bin_location.html" class="nav-item active"><i class="fa-solid fa-location-dot"></i><span>Bin Location</span></a>
+            <a href="rewards.html" class="nav-item"><i class="fa-solid fa-gift"></i><span>Rewards</span></a>
+            <a href="profile.html" class="nav-item"><i class="fa-solid fa-user"></i><span>Profile</span></a>
+        </div>
+    </div>
+<script>
+// Read URL params for filtering
+var params=new URLSearchParams(window.location.search);
+var highlight=params.get('highlight'); // 'dry', 'wet', 'ewaste', or null
+var binParam=params.get('bin'); // 'Blue', 'Green', 'Red', or null
+
+var map=L.map('bin-map').setView([23.2599,77.4126],13);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
+
+// Icon creators — normal (large) and dimmed (small, faded)
+function mkIcon(c,size){return L.divIcon({html:`<i class="fa-solid fa-trash-can" style="color:${c};font-size:${size}px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.4))"></i>`,className:'',iconSize:[size,size],iconAnchor:[size/2,size],popupAnchor:[0,-size]})}
+
+var colors={wet:'#16a34a',dry:'#2563eb',ewaste:'#dc2626'};
+var bgs={wet:'rgba(22,163,74,.12)',dry:'rgba(37,99,235,.12)',ewaste:'rgba(220,38,38,.12)'};
+var emojis={wet:'🟢',dry:'🔵',ewaste:'🔴'};
+var names={wet:'Green Bin (Wet Waste)',dry:'Blue Bin (Dry Waste)',ewaste:'Red Bin (E-Waste)'};
+
+// Build bin data
+var binData=[
+    {lat:23.2650,lng:77.5150,type:'dry',name:'Blue Bin (Dry Waste)',dist:'120 m'},
+    {lat:23.2580,lng:77.4150,type:'wet',name:'Green Bin (Wet Waste)',dist:'160 m'},
+    {lat:23.2550,lng:77.4120,type:'ewaste',name:'Red Bin (E-Waste)',dist:'220 m'},
+];
+var types=['wet','dry','ewaste'];
+for(var i=0;i<30;i++){
+    var t=types[Math.floor(Math.random()*3)];
+    binData.push({lat:23.22+Math.random()*.08,lng:77.37+Math.random()*.08,type:t,name:names[t]||'Smart Bin #'+(i+4),dist:Math.floor(Math.random()*800+100)+' m'});
+}
+
+// Show highlight banner if filtering
+if(highlight){
+    var banner=document.getElementById('highlight-banner');
+    banner.style.display='block';
+    banner.style.background=colors[highlight]||'#6b7280';
+    banner.innerHTML='<i class="fa-solid fa-location-arrow" style="margin-right:6px"></i> Showing '+(names[highlight]||'Bins')+' near you';
+    // Sort: highlighted bins first
+    binData.sort(function(a,b){return (a.type===highlight?0:1)-(b.type===highlight?0:1)});
+}
+
+// Render map markers and list
+var listEl=document.getElementById('bins-list');
+var listCount=0;
+binData.forEach(function(b){
+    var isMatch=!highlight||b.type===highlight;
+    var icon=mkIcon(colors[b.type], isMatch?24:14);
+    var marker=L.marker([b.lat,b.lng],{icon:icon,zIndexOffset:isMatch?1000:0}).addTo(map);
+    if(isMatch){
+        marker.bindPopup('<b>'+b.name+'</b><br><span style="color:#64748b;font-size:12px">'+b.dist+' away</span>');
+    }
+    // List: show matching first, or all if no filter
+    if(listCount<10 && isMatch){
+        var opacity=isMatch?'1':'0.4';
+        listEl.innerHTML+='<div class="bin-card" style="opacity:'+opacity+'"><div class="bin-card-icon" style="background:'+bgs[b.type]+'"><span style="font-size:20px">'+emojis[b.type]+'</span></div><div class="bin-card-info"><h4>'+b.name+'</h4><p>'+b.dist+' away</p></div></div>';
+        listCount++;
+    }
+});
+// If filter active and fewer than 10, fill with others
+if(highlight && listCount<10){
+    binData.forEach(function(b){
+        if(b.type!==highlight && listCount<10){
+            listEl.innerHTML+='<div class="bin-card" style="opacity:0.4"><div class="bin-card-icon" style="background:'+bgs[b.type]+'"><span style="font-size:20px">'+emojis[b.type]+'</span></div><div class="bin-card-info"><h4>'+b.name+'</h4><p>'+b.dist+' away</p></div></div>';
+            listCount++;
+        }
+    });
+}
+</script>
+</body>
+</html>
