@@ -3,7 +3,10 @@ from flask_cors import CORS
 from datetime import datetime
 from pymongo import MongoClient, ASCENDING
 from dotenv import load_dotenv
-import os, random
+import os, random, pytz
+
+def get_ist_time():
+    return datetime.now(pytz.timezone('Asia/Kolkata'))
 
 load_dotenv()
 
@@ -139,7 +142,7 @@ def signup():
         "points":         0,
         "total_scans":    0,
         "verified_count": 0,
-        "join_date":      datetime.now().strftime("%d %b %Y"),
+        "join_date":      get_ist_time().strftime("%d %b %Y"),
         "history":        [],
         "transactions":   []
     })
@@ -308,7 +311,7 @@ def set_pending_drop():
     login_id     = data.get('login_id')
     expected_bin = data.get('expected_bin')
     waste_type   = data.get('waste_type', 'Unknown')
-    timestamp    = datetime.now().strftime("%d %b %Y, %I:%M %p")
+    timestamp    = get_ist_time().strftime("%d %b %Y, %I:%M %p")
 
     pending_drop = {
         'login_id':     login_id,
@@ -397,7 +400,7 @@ def finalize_drop():
         return jsonify({"success": True, "status": "retry",
                         "message": "AI can't identify the trash. Please show it clearly!"})
 
-    timestamp = datetime.now().strftime("%d %b %Y, %I:%M %p")
+    timestamp = get_ist_time().strftime("%d %b %Y, %I:%M %p")
 
     if (expected_clean in actual_clean) or (actual_clean in expected_clean):
         new_points = current_points + 10
@@ -562,7 +565,7 @@ def redeem_points():
         return jsonify({"success": False, "message": "Insufficient points!"})
 
     new_points = current_points - amount
-    timestamp  = datetime.now().strftime("%d %b %Y, %I:%M %p")
+    timestamp  = get_ist_time().strftime("%d %b %Y, %I:%M %p")
     users_col.update_one({"email": user['email']}, {
         "$set":  {"points": new_points},
         "$push": {"transactions": {"$each": [{

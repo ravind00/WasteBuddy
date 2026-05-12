@@ -25,8 +25,8 @@ def get_ai_prediction(image_path):
     confidence_score = prediction[0][index]
 
     # 5. 🔥 HACKATHON PRO LOGIC 🔥
-    # Strict 70% ki jagah ab hum 40% (0.40) par bhi AI ko pass kar denge
-    if confidence_score > 0.40:
+    # Strict 70% ki jagah ab hum 60% (0.60) par AI ko pass kar denge
+    if confidence_score >= 0.60:
         # Format check: Ensure label correctly splits (e.g., "0 E-Waste")
         parts = class_name.split(" ")
         if len(parts) > 1:
@@ -36,5 +36,5 @@ def get_ai_prediction(image_path):
             
         return {"waste_type": result, "confidence": float(confidence_score)}
     else:
-        # Agar 40% se bhi kam hai, tabhi fail karo
+        # Agar 60% se bhi kam hai, tabhi fail karo
         return {"waste_type": "Unknown", "confidence": float(confidence_score)}
