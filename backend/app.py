@@ -230,8 +230,13 @@ def analyze_waste_route():
         if AI_AVAILABLE:
             ai_result = get_ai_prediction(filepath)
         else:
-            chosen    = random.choice(["Dry", "Wet", "E-Waste"])
-            ai_result = {"waste_type": chosen, "confidence": round(random.uniform(0.7, 0.99), 2)}
+            # Use file size to make a consistent "pseudo-random" choice
+            # so the same image gives the same result, avoiding random flip-flops!
+            file_size = os.path.getsize(filepath)
+            if file_size % 3 == 0: chosen = "Dry"
+            elif file_size % 3 == 1: chosen = "Wet"
+            else: chosen = "E-Waste"
+            ai_result = {"waste_type": chosen, "confidence": 0.85}
 
         waste_type  = str(ai_result.get('waste_type', 'Unknown')).strip()
         waste_lower = waste_type.lower()

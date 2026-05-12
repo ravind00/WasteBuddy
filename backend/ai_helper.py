@@ -26,7 +26,7 @@ def get_ai_prediction(image_path):
 
     # 5. 🔥 HACKATHON PRO LOGIC 🔥
     # Strict 70% ki jagah ab hum 40% (0.40) par bhi AI ko pass kar denge
-    if confidence_score > 0.10:
+    if confidence_score > 0.40:
         # Format check: Ensure label correctly splits (e.g., "0 E-Waste")
         parts = class_name.split(" ")
         if len(parts) > 1:
