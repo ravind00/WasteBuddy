@@ -24,9 +24,10 @@ def get_ai_prediction(image_path):
     class_name = class_names[index].strip()
     confidence_score = prediction[0][index]
 
-    # 5. 🔥 HACKATHON PRO LOGIC 🔥
-    # Strict 70% ki jagah ab hum 40% (0.40) par bhi AI ko pass kar denge
-    if confidence_score > 0.10:
+    # 5. 🔥 STABILITY LOGIC 🔥
+    # To stop random fluctuations (Wet -> Dry -> Wet), we are increasing the minimum confidence required.
+    # Agar model 60% se jyada sure hai tabhi result dega, warna "Unknown" bolega.
+    if confidence_score > 0.60:
         # Format check: Ensure label correctly splits (e.g., "0 E-Waste")
         parts = class_name.split(" ")
         if len(parts) > 1:
@@ -36,5 +37,5 @@ def get_ai_prediction(image_path):
             
         return {"waste_type": result, "confidence": float(confidence_score)}
     else:
-        # Agar 40% se bhi kam hai, tabhi fail karo
+        # Agar 60% se kam hai, toh ignore karo (Unknown) taaki galat result na aaye
         return {"waste_type": "Unknown", "confidence": float(confidence_score)}
