@@ -8,9 +8,14 @@
 // const BACKEND_URL = "https://your-backend.onrender.com";
 // ===========================================
 
-// Local testing across devices (Phone, Laptop) on same WiFi
+// Smart environment detection for Backend URL
 const host = window.location.hostname;
-const BACKEND_URL = `http://${host}:8080`;
+let BACKEND_URL;
 
-// Production URL (commented out for local testing)
-// const BACKEND_URL = "https://wastebuddy.onrender.com";
+if (host === "localhost" || host === "127.0.0.1" || host.startsWith("192.168.") || host.startsWith("172.") || host.startsWith("10.")) {
+    // Local testing across devices (Phone, Laptop) on same WiFi
+    BACKEND_URL = `http://${host}:8080`;
+} else {
+    // Production deployed URL
+    BACKEND_URL = "https://wastebuddy.onrender.com";
+}
