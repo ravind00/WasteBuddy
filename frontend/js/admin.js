@@ -15,23 +15,23 @@ document.getElementById('profileEmail').textContent     = adminEmail;
 //  BHOPAL MAP & ROUTE DATA
 // ===================================================
 
-// 12 real Bhopal locations split across 3 driver routes
+// 12 real Bhopal locations split across 3 areas
 const BHOPAL_BINS = [
-  // Driver 1 — Route A (central & north)
-  { id:'B-01', name:'MP Nagar Zone 1',       lat:23.2302, lng:77.4343, fill:82, driver:1 },
-  { id:'B-02', name:'DB Mall Area',           lat:23.2283, lng:77.4381, fill:65, driver:1 },
-  { id:'B-03', name:'New Market',             lat:23.2395, lng:77.4143, fill:90, driver:1 },
-  { id:'B-04', name:'Shyamla Hills',          lat:23.2532, lng:77.4170, fill:45, driver:1 },
-  // Driver 2 — Route B (east & south)
-  { id:'B-05', name:'Arera Colony E-5',       lat:23.2150, lng:77.4423, fill:71, driver:2 },
-  { id:'B-06', name:'Habibganj Station',      lat:23.2317, lng:77.4523, fill:55, driver:2 },
-  { id:'B-07', name:'Hoshangabad Road',       lat:23.2056, lng:77.4389, fill:88, driver:2 },
-  { id:'B-08', name:'Kolar Road Sq.',         lat:23.1948, lng:77.4451, fill:40, driver:2 },
-  // Driver 3 — Route C (west & industrial)
-  { id:'B-09', name:'Govindpura Industrial',  lat:23.2651, lng:77.4703, fill:78, driver:3 },
-  { id:'B-10', name:'Bairagarh Chichli',      lat:23.2781, lng:77.3710, fill:60, driver:3 },
-  { id:'B-11', name:'Piplani Sector C',       lat:23.2271, lng:77.5067, fill:92, driver:3 },
-  { id:'B-12', name:'Berasia Road Toll',      lat:23.3058, lng:77.4219, fill:50, driver:3 },
+  // Area 1: MP Nagar
+  { id:'B-01', name:'MP Nagar Zone 1',       lat:23.2302, lng:77.4343, fill:82, area:1 },
+  { id:'B-02', name:'MP Nagar Zone 2',       lat:23.2325, lng:77.4350, fill:65, area:1 },
+  { id:'B-03', name:'DB Mall Square',        lat:23.2283, lng:77.4381, fill:90, area:1 },
+  { id:'B-04', name:'Board Office',          lat:23.2340, lng:77.4365, fill:45, area:1 },
+  // Area 2: New Market
+  { id:'B-05', name:'New Market TT Nagar',   lat:23.2395, lng:77.4143, fill:71, area:2 },
+  { id:'B-06', name:'Roshanpura Square',     lat:23.2420, lng:77.4110, fill:55, area:2 },
+  { id:'B-07', name:'GTB Complex',           lat:23.2380, lng:77.4130, fill:88, area:2 },
+  { id:'B-08', name:'Bhadbhada Road',        lat:23.2350, lng:77.4100, fill:40, area:2 },
+  // Area 3: Minal Residency
+  { id:'B-09', name:'Minal Gate 1',          lat:23.2651, lng:77.4703, fill:78, area:3 },
+  { id:'B-10', name:'Minal Mall',            lat:23.2665, lng:77.4720, fill:60, area:3 },
+  { id:'B-11', name:'JK Road Junction',      lat:23.2680, lng:77.4680, fill:92, area:3 },
+  { id:'B-12', name:'Ayodhya Bypass',        lat:23.2700, lng:77.4650, fill:50, area:3 },
 ];
 
 const DRIVER_COLORS = { 1:'#22c55e', 2:'#3b82f6', 3:'#f59e0b' };
@@ -43,7 +43,7 @@ let truckMarker    = null;   // animated truck marker
 let animFrameId    = null;   // requestAnimationFrame id
 let binMarkers     = [];     // all bin Leaflet markers
 let depotMarker    = null;
-let selectedDriver = 1;
+let selectedArea = 1;
 let routeRunning   = false;
 
 // ===== HAVERSINE DISTANCE (km) =====
@@ -136,7 +136,7 @@ function renderBinMarkers() {
       .bindPopup(`
         <div style="font-family:Inter,sans-serif;min-width:160px">
           <b style="font-size:13px">${bin.id} — ${bin.name}</b><br>
-          <span style="color:#64748b;font-size:11px">Driver ${bin.driver} Route</span><br>
+          <span style="color:#64748b;font-size:11px">Area ${bin.area}</span><br>
           <div style="margin-top:6px;background:#e2e8f0;border-radius:4px;height:8px;overflow:hidden">
             <div style="height:100%;width:${bin.fill}%;background:${bin.fill>=80?'#ef4444':bin.fill>=60?'#f59e0b':'#22c55e'};border-radius:4px"></div>
           </div>
@@ -146,17 +146,18 @@ function renderBinMarkers() {
   });
 }
 
-// ===== DRIVER SELECTION =====
-function selectDriver(num) {
-  selectedDriver = num;
+// ===== AREA SELECTION =====
+function selectArea(num) {
+  selectedArea = num;
   document.querySelectorAll('.driver-opt').forEach(el => {
-    el.classList.toggle('selected', parseInt(el.dataset.driver) === num);
+    el.classList.toggle('selected', parseInt(el.dataset.area) === num);
   });
-  document.getElementById('routeDriverLabel').textContent = `Driver ${num} — Route ${'ABC'[num-1]}`;
+  const areaNames = { 1: 'MP Nagar', 2: 'New Market', 3: 'Minal Residency' };
+  document.getElementById('routeAreaLabel').textContent = `Route: ${areaNames[num]}`;
 
-  const driverBins = BHOPAL_BINS.filter(b => b.driver === num);
+  const areaBins = BHOPAL_BINS.filter(b => b.area === num);
   const color      = DRIVER_COLORS[num];
-  const totalDist  = calcTotalDist(nearestNeighbour(driverBins, DEPOT));
+  const totalDist  = calcTotalDist(nearestNeighbour(areaBins, DEPOT));
   const estMin     = Math.round(totalDist / 30 * 60); // ~30 km/h avg city speed
 
   document.getElementById('routeDist').textContent = totalDist.toFixed(1)+' km';
@@ -165,7 +166,7 @@ function selectDriver(num) {
 
   // Render sidebar bin list
   const listEl = document.getElementById('binStopList');
-  listEl.innerHTML = driverBins.map((b,i) => {
+  listEl.innerHTML = areaBins.map((b,i) => {
     const chipClass = b.fill>=80?'red-chip':b.fill>=60?'yel-chip':'grn-chip';
     return `<div class="bin-stop">
       <div class="stop-num">${i+1}</div>
@@ -177,10 +178,10 @@ function selectDriver(num) {
     </div>`;
   }).join('');
 
-  // Highlight driver bins on map
+  // Highlight area bins on map
   binMarkers.forEach((m, i) => {
     const bin = BHOPAL_BINS[i];
-    if (bin.driver === num) {
+    if (bin.area === num) {
       m.setZIndexOffset(1000);
     } else {
       m.setZIndexOffset(0);
@@ -240,7 +241,7 @@ function animateTruck(routePoints, color) {
               binMarkers[mIdx].getPopup() && binMarkers[mIdx].setPopupContent(`
                 <div style="font-family:Inter,sans-serif;min-width:160px">
                   <b style="font-size:13px">${binRef.id} — ${binRef.name}</b><br>
-                  <span style="color:#64748b;font-size:11px">Driver ${binRef.driver} Route</span><br>
+                  <span style="color:#64748b;font-size:11px">Area ${binRef.area} Route</span><br>
                   <div style="margin-top:6px;background:#e2e8f0;border-radius:4px;height:8px;overflow:hidden">
                     <div style="height:100%;width:5%;background:#22c55e;border-radius:4px"></div>
                   </div>
@@ -283,17 +284,17 @@ function animateTruck(routePoints, color) {
 
 // ===== START / STOP ROUTE =====
 function startRoute() {
-  const driverBins = BHOPAL_BINS.filter(b => b.driver === selectedDriver && b.fill >= 60);
+  const areaBins = BHOPAL_BINS.filter(b => b.area === selectedArea && b.fill >= 60);
 
-  if (driverBins.length === 0) {
-    showToast('No alerted bins (>=60% full) on this route!', 'yellow');
+  if (areaBins.length === 0) {
+    showToast('No alerted bins (>=60% full) in this area!', 'yellow');
     return;
   }
 
-  const color      = DRIVER_COLORS[selectedDriver];
+  const color      = DRIVER_COLORS[selectedArea];
 
   // Compute shortest path
-  const optimal = nearestNeighbour(driverBins, DEPOT);
+  const optimal = nearestNeighbour(areaBins, DEPOT);
 
   // Build LatLng array
   const latlngs = optimal.map(p => [p.lat, p.lng]);
@@ -327,7 +328,7 @@ function startRoute() {
     ].join('');
   }).join('');
 
-  document.getElementById('routeSeqStatus').textContent = `${driverBins.length} stops — optimised`;
+  document.getElementById('routeSeqStatus').textContent = `${areaBins.length} stops — optimised`;
 
   // Status bar
   const bar = document.getElementById('routeStatusBar');
@@ -345,7 +346,7 @@ function startRoute() {
   btn.onclick    = stopRoute;
   routeRunning   = true;
 
-  showToast(`Driver ${selectedDriver} route started! ${driverBins.length} stops.`);
+  showToast(`Area ${selectedArea} route started! ${areaBins.length} stops.`);
 }
 
 function stopRoute() {
@@ -379,17 +380,17 @@ document.addEventListener('DOMContentLoaded', () => {
 // ===== DATA STORE — bins mirror BHOPAL_BINS locations =====
 let bins = [
   {id:'B-01',location:'MP Nagar Zone 1, Bhopal',     fill:82, status:'Active', updated:'1 min ago'},
-  {id:'B-02',location:'DB Mall Area, Bhopal',         fill:65, status:'Active', updated:'2 min ago'},
-  {id:'B-03',location:'New Market, Bhopal',            fill:90, status:'Active', updated:'3 min ago'},
-  {id:'B-04',location:'Shyamla Hills, Bhopal',         fill:45, status:'Active', updated:'4 min ago'},
-  {id:'B-05',location:'Arera Colony E-5, Bhopal',      fill:71, status:'Active', updated:'5 min ago'},
-  {id:'B-06',location:'Habibganj Station, Bhopal',     fill:55, status:'Active', updated:'6 min ago'},
-  {id:'B-07',location:'Hoshangabad Road, Bhopal',      fill:88, status:'Active', updated:'7 min ago'},
-  {id:'B-08',location:'Kolar Road Sq., Bhopal',        fill:40, status:'Active', updated:'8 min ago'},
-  {id:'B-09',location:'Govindpura Industrial, Bhopal', fill:78, status:'Active', updated:'9 min ago'},
-  {id:'B-10',location:'Bairagarh Chichli, Bhopal',     fill:60, status:'Active', updated:'10 min ago'},
-  {id:'B-11',location:'Piplani Sector C, Bhopal',      fill:92, status:'Active', updated:'11 min ago'},
-  {id:'B-12',location:'Berasia Road Toll, Bhopal',     fill:50, status:'Active', updated:'12 min ago'},
+  {id:'B-02',location:'MP Nagar Zone 2, Bhopal',     fill:65, status:'Active', updated:'2 min ago'},
+  {id:'B-03',location:'DB Mall Square, Bhopal',      fill:90, status:'Active', updated:'3 min ago'},
+  {id:'B-04',location:'Board Office, Bhopal',        fill:45, status:'Active', updated:'4 min ago'},
+  {id:'B-05',location:'New Market TT Nagar, Bhopal', fill:71, status:'Active', updated:'5 min ago'},
+  {id:'B-06',location:'Roshanpura Square, Bhopal',   fill:55, status:'Active', updated:'6 min ago'},
+  {id:'B-07',location:'GTB Complex, Bhopal',         fill:88, status:'Active', updated:'7 min ago'},
+  {id:'B-08',location:'Bhadbhada Road, Bhopal',      fill:40, status:'Active', updated:'8 min ago'},
+  {id:'B-09',location:'Minal Gate 1, Bhopal',        fill:78, status:'Active', updated:'9 min ago'},
+  {id:'B-10',location:'Minal Mall, Bhopal',          fill:60, status:'Active', updated:'10 min ago'},
+  {id:'B-11',location:'JK Road Junction, Bhopal',    fill:92, status:'Active', updated:'11 min ago'},
+  {id:'B-12',location:'Ayodhya Bypass, Bhopal',      fill:50, status:'Active', updated:'12 min ago'},
 ];
 
 let collections = [
@@ -536,7 +537,7 @@ navItems.forEach(nav => {
     if (target==='alerts')      renderAlerts('all');
     if (target==='users')       loadAppUsers();
     if (target==='reports')     renderReportsChart();
-    if (target==='routes')      { initRouteMap(); selectDriver(selectedDriver); routeMap.invalidateSize(); }
+    if (target==='routes')      { initRouteMap(); selectArea(selectedArea); routeMap.invalidateSize(); }
   });
 });
 

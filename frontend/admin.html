@@ -162,8 +162,8 @@
       <!-- ROUTES PAGE -->
       <section id="routes" class="page">
         <div class="page-header">
-          <h1>Route Optimization — Bhopal</h1>
-          <span class="driver-badge" id="routeDriverLabel" style="font-size:13px;padding:6px 14px">Select Driver →</span>
+          <h1>Route Optimization — Area Wise</h1>
+          <span class="driver-badge" id="routeAreaLabel" style="font-size:13px;padding:6px 14px">Select Area →</span>
         </div>
 
         <div class="route-layout">
@@ -186,21 +186,21 @@
           <!-- RIGHT: CONTROLS -->
           <div class="route-sidebar">
 
-            <!-- Driver Selector -->
+            <!-- Area Selector -->
             <div class="route-controls">
-              <h3 class="box-title" style="margin-bottom:12px">Select Driver</h3>
+              <h3 class="box-title" style="margin-bottom:12px">Select Area</h3>
               <div class="driver-selector">
-                <div class="driver-opt selected" data-driver="1" onclick="selectDriver(1)">
+                <div class="driver-opt selected" data-area="1" onclick="selectArea(1)">
                   <span class="dot" style="background:#22c55e"></span>
-                  <i class="fas fa-truck" style="color:#22c55e"></i> Driver 1 — Route A
+                  <i class="fas fa-map-marked-alt" style="color:#22c55e"></i> MP Nagar Area
                 </div>
-                <div class="driver-opt" data-driver="2" onclick="selectDriver(2)">
+                <div class="driver-opt" data-area="2" onclick="selectArea(2)">
                   <span class="dot" style="background:#3b82f6"></span>
-                  <i class="fas fa-truck" style="color:#3b82f6"></i> Driver 2 — Route B
+                  <i class="fas fa-map-marked-alt" style="color:#3b82f6"></i> New Market Area
                 </div>
-                <div class="driver-opt" data-driver="3" onclick="selectDriver(3)">
+                <div class="driver-opt" data-area="3" onclick="selectArea(3)">
                   <span class="dot" style="background:#f59e0b"></span>
-                  <i class="fas fa-truck" style="color:#f59e0b"></i> Driver 3 — Route C
+                  <i class="fas fa-map-marked-alt" style="color:#f59e0b"></i> Minal Residency
                 </div>
               </div>
 
@@ -214,9 +214,9 @@
 
             <!-- Bin Stop List -->
             <div class="route-controls">
-              <h3 class="box-title" style="margin-bottom:10px">Bins on Route</h3>
+              <h3 class="box-title" style="margin-bottom:10px">Bins in Area</h3>
               <div class="bin-stop-list" id="binStopList">
-                <p style="color:var(--muted);font-size:12px;text-align:center;padding:10px">Select a driver to see bins</p>
+                <p style="color:var(--muted);font-size:12px;text-align:center;padding:10px">Select an area to see bins</p>
               </div>
             </div>
 
