@@ -15,26 +15,53 @@ document.getElementById('profileEmail').textContent     = adminEmail;
 //  BHOPAL MAP & ROUTE DATA
 // ===================================================
 
-// 12 real Bhopal locations split across 3 areas
+// Bhopal locations split across 10 areas
 const BHOPAL_BINS = [
   // Area 1: MP Nagar
   { id:'B-01', name:'MP Nagar Zone 1',       lat:23.2302, lng:77.4343, fill:82, area:1 },
   { id:'B-02', name:'MP Nagar Zone 2',       lat:23.2325, lng:77.4350, fill:65, area:1 },
   { id:'B-03', name:'DB Mall Square',        lat:23.2283, lng:77.4381, fill:90, area:1 },
-  { id:'B-04', name:'Board Office',          lat:23.2340, lng:77.4365, fill:45, area:1 },
   // Area 2: New Market
-  { id:'B-05', name:'New Market TT Nagar',   lat:23.2395, lng:77.4143, fill:71, area:2 },
-  { id:'B-06', name:'Roshanpura Square',     lat:23.2420, lng:77.4110, fill:55, area:2 },
-  { id:'B-07', name:'GTB Complex',           lat:23.2380, lng:77.4130, fill:88, area:2 },
-  { id:'B-08', name:'Bhadbhada Road',        lat:23.2350, lng:77.4100, fill:40, area:2 },
+  { id:'B-04', name:'New Market TT Nagar',   lat:23.2395, lng:77.4143, fill:71, area:2 },
+  { id:'B-05', name:'Roshanpura Square',     lat:23.2420, lng:77.4110, fill:55, area:2 },
+  { id:'B-06', name:'GTB Complex',           lat:23.2380, lng:77.4130, fill:88, area:2 },
   // Area 3: Minal Residency
-  { id:'B-09', name:'Minal Gate 1',          lat:23.2651, lng:77.4703, fill:78, area:3 },
-  { id:'B-10', name:'Minal Mall',            lat:23.2665, lng:77.4720, fill:60, area:3 },
-  { id:'B-11', name:'JK Road Junction',      lat:23.2680, lng:77.4680, fill:92, area:3 },
-  { id:'B-12', name:'Ayodhya Bypass',        lat:23.2700, lng:77.4650, fill:50, area:3 },
+  { id:'B-07', name:'Minal Gate 1',          lat:23.2651, lng:77.4703, fill:78, area:3 },
+  { id:'B-08', name:'Minal Mall',            lat:23.2665, lng:77.4720, fill:60, area:3 },
+  { id:'B-09', name:'JK Road Junction',      lat:23.2680, lng:77.4680, fill:92, area:3 },
+  // Area 4: Arera Colony
+  { id:'B-10', name:'Arera Colony E-5',      lat:23.2150, lng:77.4423, fill:45, area:4 },
+  { id:'B-11', name:'Arera Colony E-3',      lat:23.2200, lng:77.4350, fill:85, area:4 },
+  // Area 5: Kolar Road
+  { id:'B-12', name:'Kolar Road Sq.',        lat:23.1948, lng:77.4451, fill:40, area:5 },
+  { id:'B-13', name:'Chuna Bhatti',          lat:23.2050, lng:77.4250, fill:75, area:5 },
+  // Area 6: Bairagarh
+  { id:'B-14', name:'Bairagarh Chichli',     lat:23.2781, lng:77.3710, fill:50, area:6 },
+  { id:'B-15', name:'Halalpura Bus Stand',   lat:23.2820, lng:77.3800, fill:68, area:6 },
+  // Area 7: Govindpura
+  { id:'B-16', name:'Govindpura Industrial', lat:23.2500, lng:77.4600, fill:88, area:7 },
+  { id:'B-17', name:'Chetak Bridge',         lat:23.2350, lng:77.4550, fill:55, area:7 },
+  // Area 8: Awadhpuri
+  { id:'B-18', name:'Awadhpuri Square',      lat:23.2300, lng:77.4900, fill:35, area:8 },
+  { id:'B-19', name:'Khajuri Kalan',         lat:23.2400, lng:77.4950, fill:95, area:8 },
+  // Area 9: BHEL / Piplani
+  { id:'B-20', name:'Piplani Sector C',      lat:23.2271, lng:77.5067, fill:82, area:9 },
+  { id:'B-21', name:'Jubilee Gate',          lat:23.2450, lng:77.4800, fill:60, area:9 },
+  // Area 10: Indrapuri
+  { id:'B-22', name:'Indrapuri Sector A',    lat:23.2550, lng:77.4750, fill:72, area:10 },
+  { id:'B-23', name:'BHEL Sangam',           lat:23.2600, lng:77.4850, fill:48, area:10 },
 ];
 
-const DRIVER_COLORS = { 1:'#22c55e', 2:'#3b82f6', 3:'#f59e0b' };
+const AREA_NAMES = {
+  1: 'MP Nagar', 2: 'New Market', 3: 'Minal Residency',
+  4: 'Arera Colony', 5: 'Kolar Road', 6: 'Bairagarh',
+  7: 'Govindpura', 8: 'Awadhpuri', 9: 'BHEL / Piplani', 10: 'Indrapuri'
+};
+
+function getAreaColor(num) {
+  const colors = ['#22c55e', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6', '#06b6d4', '#eab308', '#ef4444', '#14b8a6', '#6366f1'];
+  return colors[(num - 1) % colors.length];
+}
 const DEPOT = { lat:23.2599, lng:77.4126, name:'Depot (Smart City HQ)' }; // City centre depot
 
 let routeMap       = null;   // Leaflet map instance
@@ -148,15 +175,17 @@ function renderBinMarkers() {
 
 // ===== AREA SELECTION =====
 function selectArea(num) {
+  if (!num) return;
   selectedArea = num;
-  document.querySelectorAll('.driver-opt').forEach(el => {
-    el.classList.toggle('selected', parseInt(el.dataset.area) === num);
-  });
-  const areaNames = { 1: 'MP Nagar', 2: 'New Market', 3: 'Minal Residency' };
-  document.getElementById('routeAreaLabel').textContent = `Route: ${areaNames[num]}`;
+  
+  // Update Dropdown text value in case it was selected programmatically
+  const dropdown = document.getElementById('areaDropdown');
+  if (dropdown && dropdown.value != num) dropdown.value = num;
+
+  document.getElementById('routeAreaLabel').textContent = `Route: ${AREA_NAMES[num]}`;
 
   const areaBins = BHOPAL_BINS.filter(b => b.area === num);
-  const color      = DRIVER_COLORS[num];
+  const color      = getAreaColor(num);
   const totalDist  = calcTotalDist(nearestNeighbour(areaBins, DEPOT));
   const estMin     = Math.round(totalDist / 30 * 60); // ~30 km/h avg city speed
 
@@ -169,7 +198,7 @@ function selectArea(num) {
   listEl.innerHTML = areaBins.map((b,i) => {
     const chipClass = b.fill>=80?'red-chip':b.fill>=60?'yel-chip':'grn-chip';
     return `<div class="bin-stop">
-      <div class="stop-num">${i+1}</div>
+      <div class="stop-num" style="background:${color}">${i+1}</div>
       <div style="flex:1">
         <div style="font-weight:600">${b.id}</div>
         <div style="color:var(--muted);font-size:11px">${b.name}</div>
@@ -178,7 +207,17 @@ function selectArea(num) {
     </div>`;
   }).join('');
 
-  // Highlight area bins on map
+  // Fit bounds to selected area bins to auto-pan and zoom map
+  // ALL bins remain visible on map because we don't remove markers
+  if (routeMap && areaBins.length > 0) {
+    const latlngs = areaBins.map(b => [b.lat, b.lng]);
+    // Also include DEPOT so route always fits
+    latlngs.push([DEPOT.lat, DEPOT.lng]);
+    const bounds = L.latLngBounds(latlngs);
+    routeMap.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
+  }
+
+  // Highlight area bins slightly
   binMarkers.forEach((m, i) => {
     const bin = BHOPAL_BINS[i];
     if (bin.area === num) {
@@ -291,7 +330,7 @@ function startRoute() {
     return;
   }
 
-  const color      = DRIVER_COLORS[selectedArea];
+  const color      = getAreaColor(selectedArea);
 
   // Compute shortest path
   const optimal = nearestNeighbour(areaBins, DEPOT);
@@ -378,20 +417,13 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ===== DATA STORE — bins mirror BHOPAL_BINS locations =====
-let bins = [
-  {id:'B-01',location:'MP Nagar Zone 1, Bhopal',     fill:82, status:'Active', updated:'1 min ago'},
-  {id:'B-02',location:'MP Nagar Zone 2, Bhopal',     fill:65, status:'Active', updated:'2 min ago'},
-  {id:'B-03',location:'DB Mall Square, Bhopal',      fill:90, status:'Active', updated:'3 min ago'},
-  {id:'B-04',location:'Board Office, Bhopal',        fill:45, status:'Active', updated:'4 min ago'},
-  {id:'B-05',location:'New Market TT Nagar, Bhopal', fill:71, status:'Active', updated:'5 min ago'},
-  {id:'B-06',location:'Roshanpura Square, Bhopal',   fill:55, status:'Active', updated:'6 min ago'},
-  {id:'B-07',location:'GTB Complex, Bhopal',         fill:88, status:'Active', updated:'7 min ago'},
-  {id:'B-08',location:'Bhadbhada Road, Bhopal',      fill:40, status:'Active', updated:'8 min ago'},
-  {id:'B-09',location:'Minal Gate 1, Bhopal',        fill:78, status:'Active', updated:'9 min ago'},
-  {id:'B-10',location:'Minal Mall, Bhopal',          fill:60, status:'Active', updated:'10 min ago'},
-  {id:'B-11',location:'JK Road Junction, Bhopal',    fill:92, status:'Active', updated:'11 min ago'},
-  {id:'B-12',location:'Ayodhya Bypass, Bhopal',      fill:50, status:'Active', updated:'12 min ago'},
-];
+let bins = BHOPAL_BINS.map(b => ({
+  id: b.id,
+  location: b.name + ', Bhopal',
+  fill: b.fill,
+  status: 'Active',
+  updated: Math.floor(Math.random() * 15 + 1) + ' min ago'
+}));
 
 let collections = [
   {id:'COL-001',route:'Route 1',driver:'Driver 1',status:'Completed',time:'Today, 09:33 AM'},

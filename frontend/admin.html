@@ -189,19 +189,20 @@
             <!-- Area Selector -->
             <div class="route-controls">
               <h3 class="box-title" style="margin-bottom:12px">Select Area</h3>
-              <div class="driver-selector">
-                <div class="driver-opt selected" data-area="1" onclick="selectArea(1)">
-                  <span class="dot" style="background:#22c55e"></span>
-                  <i class="fas fa-map-marked-alt" style="color:#22c55e"></i> MP Nagar Area
-                </div>
-                <div class="driver-opt" data-area="2" onclick="selectArea(2)">
-                  <span class="dot" style="background:#3b82f6"></span>
-                  <i class="fas fa-map-marked-alt" style="color:#3b82f6"></i> New Market Area
-                </div>
-                <div class="driver-opt" data-area="3" onclick="selectArea(3)">
-                  <span class="dot" style="background:#f59e0b"></span>
-                  <i class="fas fa-map-marked-alt" style="color:#f59e0b"></i> Minal Residency
-                </div>
+              <div class="driver-selector" style="margin-bottom:15px">
+                <select id="areaDropdown" class="select-input" style="width:100%; padding:12px; font-size:14px; font-weight:600; border-radius:8px; border:1px solid var(--border); background:var(--card2); color:#fff; cursor:pointer" onchange="selectArea(parseInt(this.value))">
+                  <option value="" disabled selected>-- Choose an Area --</option>
+                  <option value="1">1. MP Nagar Area</option>
+                  <option value="2">2. New Market Area</option>
+                  <option value="3">3. Minal Residency</option>
+                  <option value="4">4. Arera Colony</option>
+                  <option value="5">5. Kolar Road</option>
+                  <option value="6">6. Bairagarh (Sant Hirdaram Nagar)</option>
+                  <option value="7">7. Govindpura Industrial Area</option>
+                  <option value="8">8. Awadhpuri</option>
+                  <option value="9">9. BHEL / Piplani</option>
+                  <option value="10">10. Indrapuri</option>
+                </select>
               </div>
 
               <!-- Route Stats -->
