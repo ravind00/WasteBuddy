@@ -27,7 +27,7 @@ def get_ai_prediction(image_path):
     # 5. 🔥 STABILITY LOGIC 🔥
     # To stop random fluctuations (Wet -> Dry -> Wet), we are increasing the minimum confidence required.
     # Agar model 60% se jyada sure hai tabhi result dega, warna "Unknown" bolega.
-    if confidence_score >= 0.60:
+    if confidence_score >= 0.50:
         # Format check: Ensure label correctly splits (e.g., "0 E-Waste")
         parts = class_name.split(" ")
         if len(parts) > 1:
