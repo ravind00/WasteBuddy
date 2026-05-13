@@ -15,41 +15,70 @@ document.getElementById('profileEmail').textContent     = adminEmail;
 //  BHOPAL MAP & ROUTE DATA
 // ===================================================
 
-// Bhopal locations split across 10 areas, each bin assigned a driver
+// Bhopal locations — 50+ bins across 10 areas, each bin assigned a driver
 const BHOPAL_BINS = [
-  // Area 1: MP Nagar
+  // Area 1: MP Nagar (6 bins, 3 drivers)
   { id:'B-01', name:'MP Nagar Zone 1',       lat:23.2302, lng:77.4343, fill:82, area:1, driver:1 },
   { id:'B-02', name:'MP Nagar Zone 2',       lat:23.2325, lng:77.4350, fill:65, area:1, driver:1 },
   { id:'B-03', name:'DB Mall Square',        lat:23.2283, lng:77.4381, fill:90, area:1, driver:2 },
-  // Area 2: New Market
-  { id:'B-04', name:'New Market TT Nagar',   lat:23.2395, lng:77.4143, fill:71, area:2, driver:1 },
-  { id:'B-05', name:'Roshanpura Square',     lat:23.2420, lng:77.4110, fill:55, area:2, driver:2 },
-  { id:'B-06', name:'GTB Complex',           lat:23.2380, lng:77.4130, fill:88, area:2, driver:1 },
-  // Area 3: Minal Residency
-  { id:'B-07', name:'Minal Gate 1',          lat:23.2651, lng:77.4703, fill:78, area:3, driver:1 },
-  { id:'B-08', name:'Minal Mall',            lat:23.2665, lng:77.4720, fill:60, area:3, driver:2 },
-  { id:'B-09', name:'JK Road Junction',      lat:23.2680, lng:77.4680, fill:92, area:3, driver:1 },
-  // Area 4: Arera Colony
-  { id:'B-10', name:'Arera Colony E-5',      lat:23.2150, lng:77.4423, fill:45, area:4, driver:1 },
-  { id:'B-11', name:'Arera Colony E-3',      lat:23.2200, lng:77.4350, fill:85, area:4, driver:2 },
-  // Area 5: Kolar Road
-  { id:'B-12', name:'Kolar Road Sq.',        lat:23.1948, lng:77.4451, fill:40, area:5, driver:1 },
-  { id:'B-13', name:'Chuna Bhatti',          lat:23.2050, lng:77.4250, fill:75, area:5, driver:2 },
-  // Area 6: Bairagarh
-  { id:'B-14', name:'Bairagarh Chichli',     lat:23.2781, lng:77.3710, fill:50, area:6, driver:1 },
-  { id:'B-15', name:'Halalpura Bus Stand',   lat:23.2820, lng:77.3800, fill:68, area:6, driver:2 },
-  // Area 7: Govindpura
-  { id:'B-16', name:'Govindpura Industrial', lat:23.2500, lng:77.4600, fill:88, area:7, driver:1 },
-  { id:'B-17', name:'Chetak Bridge',         lat:23.2350, lng:77.4550, fill:55, area:7, driver:2 },
-  // Area 8: Awadhpuri
-  { id:'B-18', name:'Awadhpuri Square',      lat:23.2300, lng:77.4900, fill:35, area:8, driver:1 },
-  { id:'B-19', name:'Khajuri Kalan',         lat:23.2400, lng:77.4950, fill:95, area:8, driver:2 },
-  // Area 9: BHEL / Piplani
-  { id:'B-20', name:'Piplani Sector C',      lat:23.2271, lng:77.5067, fill:82, area:9, driver:1 },
-  { id:'B-21', name:'Jubilee Gate',          lat:23.2450, lng:77.4800, fill:60, area:9, driver:2 },
-  // Area 10: Indrapuri
-  { id:'B-22', name:'Indrapuri Sector A',    lat:23.2550, lng:77.4750, fill:72, area:10, driver:1 },
-  { id:'B-23', name:'BHEL Sangam',           lat:23.2600, lng:77.4850, fill:48, area:10, driver:2 },
+  { id:'B-04', name:'Board Office Chowk',    lat:23.2340, lng:77.4365, fill:45, area:1, driver:2 },
+  { id:'B-05', name:'Zone 1 Market',         lat:23.2310, lng:77.4320, fill:72, area:1, driver:3 },
+  { id:'B-06', name:'Platinum Plaza',        lat:23.2295, lng:77.4395, fill:58, area:1, driver:3 },
+  // Area 2: New Market (6 bins, 3 drivers)
+  { id:'B-07', name:'New Market TT Nagar',   lat:23.2395, lng:77.4143, fill:71, area:2, driver:1 },
+  { id:'B-08', name:'Roshanpura Square',     lat:23.2420, lng:77.4110, fill:55, area:2, driver:1 },
+  { id:'B-09', name:'GTB Complex',           lat:23.2380, lng:77.4130, fill:88, area:2, driver:2 },
+  { id:'B-10', name:'Bhadbhada Road',        lat:23.2350, lng:77.4100, fill:40, area:2, driver:2 },
+  { id:'B-11', name:'Jawahar Chowk',        lat:23.2410, lng:77.4155, fill:78, area:2, driver:3 },
+  { id:'B-12', name:'Sultania Road',         lat:23.2365, lng:77.4170, fill:62, area:2, driver:3 },
+  // Area 3: Minal Residency (5 bins, 2 drivers)
+  { id:'B-13', name:'Minal Gate 1',          lat:23.2651, lng:77.4703, fill:78, area:3, driver:1 },
+  { id:'B-14', name:'Minal Mall',            lat:23.2665, lng:77.4720, fill:60, area:3, driver:1 },
+  { id:'B-15', name:'JK Road Junction',      lat:23.2680, lng:77.4680, fill:92, area:3, driver:2 },
+  { id:'B-16', name:'Ayodhya Bypass',        lat:23.2700, lng:77.4650, fill:50, area:3, driver:2 },
+  { id:'B-17', name:'Minal Gate 2',          lat:23.2640, lng:77.4735, fill:85, area:3, driver:1 },
+  // Area 4: Arera Colony (5 bins, 2 drivers)
+  { id:'B-18', name:'Arera Colony E-5',      lat:23.2150, lng:77.4423, fill:45, area:4, driver:1 },
+  { id:'B-19', name:'Arera Colony E-3',      lat:23.2200, lng:77.4350, fill:85, area:4, driver:1 },
+  { id:'B-20', name:'Arera Hills Park',      lat:23.2180, lng:77.4400, fill:68, area:4, driver:2 },
+  { id:'B-21', name:'Shyamla Hills Gate',    lat:23.2250, lng:77.4300, fill:33, area:4, driver:2 },
+  { id:'B-22', name:'MANIT Square',          lat:23.2120, lng:77.4380, fill:77, area:4, driver:1 },
+  // Area 5: Kolar Road (5 bins, 2 drivers)
+  { id:'B-23', name:'Kolar Road Sq.',        lat:23.1948, lng:77.4451, fill:40, area:5, driver:1 },
+  { id:'B-24', name:'Chuna Bhatti',          lat:23.2050, lng:77.4250, fill:75, area:5, driver:1 },
+  { id:'B-25', name:'Misrod Square',         lat:23.1880, lng:77.4500, fill:88, area:5, driver:2 },
+  { id:'B-26', name:'Narmada Hospital Rd',   lat:23.1990, lng:77.4380, fill:52, area:5, driver:2 },
+  { id:'B-27', name:'Ratibad Road Turn',     lat:23.1850, lng:77.4420, fill:65, area:5, driver:1 },
+  // Area 6: Bairagarh (5 bins, 2 drivers)
+  { id:'B-28', name:'Bairagarh Chichli',     lat:23.2781, lng:77.3710, fill:50, area:6, driver:1 },
+  { id:'B-29', name:'Halalpura Bus Stand',   lat:23.2820, lng:77.3800, fill:68, area:6, driver:1 },
+  { id:'B-30', name:'Bairagarh Station',     lat:23.2750, lng:77.3750, fill:82, area:6, driver:2 },
+  { id:'B-31', name:'Fanda Road',            lat:23.2800, lng:77.3680, fill:35, area:6, driver:2 },
+  { id:'B-32', name:'Karond Square',         lat:23.2730, lng:77.3830, fill:73, area:6, driver:1 },
+  // Area 7: Govindpura (5 bins, 2 drivers)
+  { id:'B-33', name:'Govindpura Industrial', lat:23.2500, lng:77.4600, fill:88, area:7, driver:1 },
+  { id:'B-34', name:'Chetak Bridge',         lat:23.2350, lng:77.4550, fill:55, area:7, driver:1 },
+  { id:'B-35', name:'Shahpura Lake',         lat:23.2420, lng:77.4520, fill:70, area:7, driver:2 },
+  { id:'B-36', name:'Danish Nagar',          lat:23.2480, lng:77.4650, fill:42, area:7, driver:2 },
+  { id:'B-37', name:'Lalghati Square',       lat:23.2550, lng:77.4570, fill:91, area:7, driver:1 },
+  // Area 8: Awadhpuri (5 bins, 2 drivers)
+  { id:'B-38', name:'Awadhpuri Square',      lat:23.2300, lng:77.4900, fill:35, area:8, driver:1 },
+  { id:'B-39', name:'Khajuri Kalan',         lat:23.2400, lng:77.4950, fill:95, area:8, driver:1 },
+  { id:'B-40', name:'Sagar Institute Rd',    lat:23.2350, lng:77.4930, fill:62, area:8, driver:2 },
+  { id:'B-41', name:'Bawadiya Kalan',        lat:23.2250, lng:77.4870, fill:80, area:8, driver:2 },
+  { id:'B-42', name:'Chandbad',              lat:23.2380, lng:77.4980, fill:48, area:8, driver:1 },
+  // Area 9: BHEL / Piplani (5 bins, 2 drivers)
+  { id:'B-43', name:'Piplani Sector C',      lat:23.2271, lng:77.5067, fill:82, area:9, driver:1 },
+  { id:'B-44', name:'Jubilee Gate',          lat:23.2450, lng:77.4800, fill:60, area:9, driver:1 },
+  { id:'B-45', name:'BHEL Main Gate',        lat:23.2380, lng:77.4900, fill:73, area:9, driver:2 },
+  { id:'B-46', name:'Piplani Market',        lat:23.2310, lng:77.5020, fill:55, area:9, driver:2 },
+  { id:'B-47', name:'HEL Colony Gate',       lat:23.2340, lng:77.4960, fill:90, area:9, driver:1 },
+  // Area 10: Indrapuri (5 bins, 2 drivers)
+  { id:'B-48', name:'Indrapuri Sector A',    lat:23.2550, lng:77.4750, fill:72, area:10, driver:1 },
+  { id:'B-49', name:'BHEL Sangam',           lat:23.2600, lng:77.4850, fill:48, area:10, driver:1 },
+  { id:'B-50', name:'Nehru Nagar Square',    lat:23.2580, lng:77.4800, fill:85, area:10, driver:2 },
+  { id:'B-51', name:'Sector B Park',         lat:23.2530, lng:77.4780, fill:38, area:10, driver:2 },
+  { id:'B-52', name:'Tulsi Nagar',           lat:23.2510, lng:77.4830, fill:67, area:10, driver:1 },
 ];
 
 const AREA_NAMES = {
@@ -59,8 +88,8 @@ const AREA_NAMES = {
 };
 
 const AREA_DRIVERS = {
-  1:[{id:1,name:'Rajesh Kumar'},{id:2,name:'Amit Verma'}],
-  2:[{id:1,name:'Sunil Sharma'},{id:2,name:'Vikash Pal'}],
+  1:[{id:1,name:'Rajesh Kumar'},{id:2,name:'Amit Verma'},{id:3,name:'Pankaj Soni'}],
+  2:[{id:1,name:'Sunil Sharma'},{id:2,name:'Vikash Pal'},{id:3,name:'Hari Prasad'}],
   3:[{id:1,name:'Deepak Joshi'},{id:2,name:'Ramesh Yadav'}],
   4:[{id:1,name:'Manoj Singh'},{id:2,name:'Ravi Tiwari'}],
   5:[{id:1,name:'Sanjay Patel'},{id:2,name:'Kiran Dubey'}],
