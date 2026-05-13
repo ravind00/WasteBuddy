@@ -15,62 +15,76 @@ document.getElementById('profileEmail').textContent     = adminEmail;
 //  BHOPAL MAP & ROUTE DATA
 // ===================================================
 
-// Bhopal locations split across 10 areas
+// Bhopal locations split across 10 areas, each bin assigned a driver
 const BHOPAL_BINS = [
   // Area 1: MP Nagar
-  { id:'B-01', name:'MP Nagar Zone 1',       lat:23.2302, lng:77.4343, fill:82, area:1 },
-  { id:'B-02', name:'MP Nagar Zone 2',       lat:23.2325, lng:77.4350, fill:65, area:1 },
-  { id:'B-03', name:'DB Mall Square',        lat:23.2283, lng:77.4381, fill:90, area:1 },
+  { id:'B-01', name:'MP Nagar Zone 1',       lat:23.2302, lng:77.4343, fill:82, area:1, driver:1 },
+  { id:'B-02', name:'MP Nagar Zone 2',       lat:23.2325, lng:77.4350, fill:65, area:1, driver:1 },
+  { id:'B-03', name:'DB Mall Square',        lat:23.2283, lng:77.4381, fill:90, area:1, driver:2 },
   // Area 2: New Market
-  { id:'B-04', name:'New Market TT Nagar',   lat:23.2395, lng:77.4143, fill:71, area:2 },
-  { id:'B-05', name:'Roshanpura Square',     lat:23.2420, lng:77.4110, fill:55, area:2 },
-  { id:'B-06', name:'GTB Complex',           lat:23.2380, lng:77.4130, fill:88, area:2 },
+  { id:'B-04', name:'New Market TT Nagar',   lat:23.2395, lng:77.4143, fill:71, area:2, driver:1 },
+  { id:'B-05', name:'Roshanpura Square',     lat:23.2420, lng:77.4110, fill:55, area:2, driver:2 },
+  { id:'B-06', name:'GTB Complex',           lat:23.2380, lng:77.4130, fill:88, area:2, driver:1 },
   // Area 3: Minal Residency
-  { id:'B-07', name:'Minal Gate 1',          lat:23.2651, lng:77.4703, fill:78, area:3 },
-  { id:'B-08', name:'Minal Mall',            lat:23.2665, lng:77.4720, fill:60, area:3 },
-  { id:'B-09', name:'JK Road Junction',      lat:23.2680, lng:77.4680, fill:92, area:3 },
+  { id:'B-07', name:'Minal Gate 1',          lat:23.2651, lng:77.4703, fill:78, area:3, driver:1 },
+  { id:'B-08', name:'Minal Mall',            lat:23.2665, lng:77.4720, fill:60, area:3, driver:2 },
+  { id:'B-09', name:'JK Road Junction',      lat:23.2680, lng:77.4680, fill:92, area:3, driver:1 },
   // Area 4: Arera Colony
-  { id:'B-10', name:'Arera Colony E-5',      lat:23.2150, lng:77.4423, fill:45, area:4 },
-  { id:'B-11', name:'Arera Colony E-3',      lat:23.2200, lng:77.4350, fill:85, area:4 },
+  { id:'B-10', name:'Arera Colony E-5',      lat:23.2150, lng:77.4423, fill:45, area:4, driver:1 },
+  { id:'B-11', name:'Arera Colony E-3',      lat:23.2200, lng:77.4350, fill:85, area:4, driver:2 },
   // Area 5: Kolar Road
-  { id:'B-12', name:'Kolar Road Sq.',        lat:23.1948, lng:77.4451, fill:40, area:5 },
-  { id:'B-13', name:'Chuna Bhatti',          lat:23.2050, lng:77.4250, fill:75, area:5 },
+  { id:'B-12', name:'Kolar Road Sq.',        lat:23.1948, lng:77.4451, fill:40, area:5, driver:1 },
+  { id:'B-13', name:'Chuna Bhatti',          lat:23.2050, lng:77.4250, fill:75, area:5, driver:2 },
   // Area 6: Bairagarh
-  { id:'B-14', name:'Bairagarh Chichli',     lat:23.2781, lng:77.3710, fill:50, area:6 },
-  { id:'B-15', name:'Halalpura Bus Stand',   lat:23.2820, lng:77.3800, fill:68, area:6 },
+  { id:'B-14', name:'Bairagarh Chichli',     lat:23.2781, lng:77.3710, fill:50, area:6, driver:1 },
+  { id:'B-15', name:'Halalpura Bus Stand',   lat:23.2820, lng:77.3800, fill:68, area:6, driver:2 },
   // Area 7: Govindpura
-  { id:'B-16', name:'Govindpura Industrial', lat:23.2500, lng:77.4600, fill:88, area:7 },
-  { id:'B-17', name:'Chetak Bridge',         lat:23.2350, lng:77.4550, fill:55, area:7 },
+  { id:'B-16', name:'Govindpura Industrial', lat:23.2500, lng:77.4600, fill:88, area:7, driver:1 },
+  { id:'B-17', name:'Chetak Bridge',         lat:23.2350, lng:77.4550, fill:55, area:7, driver:2 },
   // Area 8: Awadhpuri
-  { id:'B-18', name:'Awadhpuri Square',      lat:23.2300, lng:77.4900, fill:35, area:8 },
-  { id:'B-19', name:'Khajuri Kalan',         lat:23.2400, lng:77.4950, fill:95, area:8 },
+  { id:'B-18', name:'Awadhpuri Square',      lat:23.2300, lng:77.4900, fill:35, area:8, driver:1 },
+  { id:'B-19', name:'Khajuri Kalan',         lat:23.2400, lng:77.4950, fill:95, area:8, driver:2 },
   // Area 9: BHEL / Piplani
-  { id:'B-20', name:'Piplani Sector C',      lat:23.2271, lng:77.5067, fill:82, area:9 },
-  { id:'B-21', name:'Jubilee Gate',          lat:23.2450, lng:77.4800, fill:60, area:9 },
+  { id:'B-20', name:'Piplani Sector C',      lat:23.2271, lng:77.5067, fill:82, area:9, driver:1 },
+  { id:'B-21', name:'Jubilee Gate',          lat:23.2450, lng:77.4800, fill:60, area:9, driver:2 },
   // Area 10: Indrapuri
-  { id:'B-22', name:'Indrapuri Sector A',    lat:23.2550, lng:77.4750, fill:72, area:10 },
-  { id:'B-23', name:'BHEL Sangam',           lat:23.2600, lng:77.4850, fill:48, area:10 },
+  { id:'B-22', name:'Indrapuri Sector A',    lat:23.2550, lng:77.4750, fill:72, area:10, driver:1 },
+  { id:'B-23', name:'BHEL Sangam',           lat:23.2600, lng:77.4850, fill:48, area:10, driver:2 },
 ];
 
 const AREA_NAMES = {
-  1: 'MP Nagar', 2: 'New Market', 3: 'Minal Residency',
-  4: 'Arera Colony', 5: 'Kolar Road', 6: 'Bairagarh',
-  7: 'Govindpura', 8: 'Awadhpuri', 9: 'BHEL / Piplani', 10: 'Indrapuri'
+  1:'MP Nagar', 2:'New Market', 3:'Minal Residency',
+  4:'Arera Colony', 5:'Kolar Road', 6:'Bairagarh',
+  7:'Govindpura', 8:'Awadhpuri', 9:'BHEL / Piplani', 10:'Indrapuri'
+};
+
+const AREA_DRIVERS = {
+  1:[{id:1,name:'Rajesh Kumar'},{id:2,name:'Amit Verma'}],
+  2:[{id:1,name:'Sunil Sharma'},{id:2,name:'Vikash Pal'}],
+  3:[{id:1,name:'Deepak Joshi'},{id:2,name:'Ramesh Yadav'}],
+  4:[{id:1,name:'Manoj Singh'},{id:2,name:'Ravi Tiwari'}],
+  5:[{id:1,name:'Sanjay Patel'},{id:2,name:'Kiran Dubey'}],
+  6:[{id:1,name:'Prakash Nair'},{id:2,name:'Vikas Chouhan'}],
+  7:[{id:1,name:'Arun Mishra'},{id:2,name:'Dinesh Rawat'}],
+  8:[{id:1,name:'Suresh Gupta'},{id:2,name:'Mohan Thakur'}],
+  9:[{id:1,name:'Naveen Pandey'},{id:2,name:'Ashok Meena'}],
+  10:[{id:1,name:'Vivek Saxena'},{id:2,name:'Rahul Bhatt'}],
 };
 
 function getAreaColor(num) {
-  const colors = ['#22c55e', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6', '#06b6d4', '#eab308', '#ef4444', '#14b8a6', '#6366f1'];
+  const colors = ['#22c55e','#3b82f6','#f59e0b','#ec4899','#8b5cf6','#06b6d4','#eab308','#ef4444','#14b8a6','#6366f1'];
   return colors[(num - 1) % colors.length];
 }
-const DEPOT = { lat:23.2599, lng:77.4126, name:'Depot (Smart City HQ)' }; // City centre depot
+const DEPOT = { lat:23.2599, lng:77.4126, name:'Depot (Smart City HQ)' };
 
-let routeMap       = null;   // Leaflet map instance
-let routePolyline  = null;   // active route polyline
-let truckMarker    = null;   // animated truck marker
-let animFrameId    = null;   // requestAnimationFrame id
-let binMarkers     = [];     // all bin Leaflet markers
+let routeMap       = null;
+let routePolyline  = null;
+let truckMarker    = null;
+let animFrameId    = null;
+let binMarkers     = [];
 let depotMarker    = null;
-let selectedArea = 1;
+let selectedArea   = 1;
+let selectedDriver = 1;
 let routeRunning   = false;
 
 // ===== HAVERSINE DISTANCE (km) =====
@@ -173,29 +187,84 @@ function renderBinMarkers() {
   });
 }
 
-// ===== AREA SELECTION =====
-function selectArea(num) {
+// ===== GLOBAL AREA CHANGE (from Dashboard dropdown) =====
+function changeArea(num) {
   if (!num) return;
   selectedArea = num;
-  
-  // Update Dropdown text value in case it was selected programmatically
-  const dropdown = document.getElementById('areaDropdown');
-  if (dropdown && dropdown.value != num) dropdown.value = num;
+  selectedDriver = 1;
 
-  document.getElementById('routeAreaLabel').textContent = `Route: ${AREA_NAMES[num]}`;
+  // Sync the dashboard dropdown
+  const dd = document.getElementById('globalAreaDropdown');
+  if (dd && dd.value != num) dd.value = num;
 
-  const areaBins = BHOPAL_BINS.filter(b => b.area === num);
-  const color      = getAreaColor(num);
-  const totalDist  = calcTotalDist(nearestNeighbour(areaBins, DEPOT));
-  const estMin     = Math.round(totalDist / 30 * 60); // ~30 km/h avg city speed
+  // Update route page header
+  const rn = document.getElementById('routeAreaName');
+  if (rn) rn.textContent = AREA_NAMES[num];
 
-  document.getElementById('routeDist').textContent = totalDist.toFixed(1)+' km';
-  document.getElementById('routeTime').textContent = estMin+' min';
-  document.getElementById('routeFuel').textContent = (Math.random()*8+14).toFixed(0)+'%';
+  // Refresh all visible pages with new area data
+  renderDashboard();
+  renderBinsTable();
+  renderAlerts('all');
 
-  // Render sidebar bin list
+  // If route map is initialised, update it too
+  if (routeMap) {
+    populateDriverSelector();
+    selectDriver(1);
+  }
+
+  showToast(`Switched to ${AREA_NAMES[num]}`);
+}
+
+// ===== POPULATE DRIVER SELECTOR (Routes page) =====
+function populateDriverSelector() {
+  const container = document.getElementById('driverSelectorContainer');
+  if (!container) return;
+  const drivers = AREA_DRIVERS[selectedArea] || [];
+  const driverColors = ['#22c55e','#3b82f6','#f59e0b'];
+  container.innerHTML = drivers.map((d, i) => {
+    const color = driverColors[i % driverColors.length];
+    return `<div class="driver-opt ${d.id === selectedDriver ? 'selected' : ''}"
+                 data-driver="${d.id}" onclick="selectDriver(${d.id})">
+      <span class="dot" style="background:${color}"></span>
+      <i class="fas fa-truck" style="color:${color}"></i> ${d.name}
+    </div>`;
+  }).join('');
+}
+
+// ===== SELECT DRIVER (Routes page) =====
+function selectDriver(num) {
+  if (!num) return;
+  selectedDriver = num;
+
+  // Highlight selected driver button
+  document.querySelectorAll('.driver-opt').forEach(el => {
+    el.classList.toggle('selected', parseInt(el.dataset.driver) === num);
+  });
+
+  const drivers = AREA_DRIVERS[selectedArea] || [];
+  const dInfo = drivers.find(d => d.id === num);
+  const label = document.getElementById('routeDriverLabel');
+  if (label) label.textContent = dInfo ? dInfo.name : `Driver ${num}`;
+
+  // Filter bins for this area + driver
+  const driverBins = BHOPAL_BINS.filter(b => b.area === selectedArea && b.driver === num);
+  const color = getAreaColor(selectedArea);
+
+  if (driverBins.length > 0) {
+    const totalDist = calcTotalDist(nearestNeighbour(driverBins, DEPOT));
+    const estMin = Math.round(totalDist / 30 * 60);
+    document.getElementById('routeDist').textContent = totalDist.toFixed(1)+' km';
+    document.getElementById('routeTime').textContent = estMin+' min';
+    document.getElementById('routeFuel').textContent = (Math.random()*8+14).toFixed(0)+'%';
+  } else {
+    document.getElementById('routeDist').textContent = '—';
+    document.getElementById('routeTime').textContent = '—';
+    document.getElementById('routeFuel').textContent = '—';
+  }
+
+  // Render sidebar bin list for this driver
   const listEl = document.getElementById('binStopList');
-  listEl.innerHTML = areaBins.map((b,i) => {
+  listEl.innerHTML = driverBins.map((b,i) => {
     const chipClass = b.fill>=80?'red-chip':b.fill>=60?'yel-chip':'grn-chip';
     return `<div class="bin-stop">
       <div class="stop-num" style="background:${color}">${i+1}</div>
@@ -205,26 +274,19 @@ function selectArea(num) {
       </div>
       <span class="fill-chip ${chipClass}">${b.fill}%</span>
     </div>`;
-  }).join('');
+  }).join('') || '<p style="color:var(--muted);font-size:12px;text-align:center;padding:10px">No bins for this driver</p>';
 
-  // Fit bounds to selected area bins to auto-pan and zoom map
-  // ALL bins remain visible on map because we don't remove markers
-  if (routeMap && areaBins.length > 0) {
-    const latlngs = areaBins.map(b => [b.lat, b.lng]);
-    // Also include DEPOT so route always fits
+  // Fit bounds to driver bins but keep ALL markers on map
+  if (routeMap && driverBins.length > 0) {
+    const latlngs = driverBins.map(b => [b.lat, b.lng]);
     latlngs.push([DEPOT.lat, DEPOT.lng]);
-    const bounds = L.latLngBounds(latlngs);
-    routeMap.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
+    routeMap.fitBounds(L.latLngBounds(latlngs), { padding: [40, 40], maxZoom: 15 });
   }
 
-  // Highlight area bins slightly
+  // Highlight driver's bins on map
   binMarkers.forEach((m, i) => {
     const bin = BHOPAL_BINS[i];
-    if (bin.area === num) {
-      m.setZIndexOffset(1000);
-    } else {
-      m.setZIndexOffset(0);
-    }
+    m.setZIndexOffset(bin.area === selectedArea && bin.driver === num ? 1000 : 0);
   });
 
   // Reset route if running
@@ -323,43 +385,29 @@ function animateTruck(routePoints, color) {
 
 // ===== START / STOP ROUTE =====
 function startRoute() {
-  const areaBins = BHOPAL_BINS.filter(b => b.area === selectedArea && b.fill >= 60);
+  const driverBins = BHOPAL_BINS.filter(b => b.area === selectedArea && b.driver === selectedDriver && b.fill >= 60);
 
-  if (areaBins.length === 0) {
-    showToast('No alerted bins (>=60% full) in this area!', 'yellow');
+  if (driverBins.length === 0) {
+    showToast('No alerted bins (>=60% full) for this driver!', 'yellow');
     return;
   }
 
-  const color      = getAreaColor(selectedArea);
-
-  // Compute shortest path
-  const optimal = nearestNeighbour(areaBins, DEPOT);
-
-  // Build LatLng array
+  const color = getAreaColor(selectedArea);
+  const optimal = nearestNeighbour(driverBins, DEPOT);
   const latlngs = optimal.map(p => [p.lat, p.lng]);
 
-  // Remove old polyline
   if (routePolyline) routeMap.removeLayer(routePolyline);
 
-  // Draw route polyline with glow effect
-  // Shadow line
   L.polyline(latlngs, { color:'#000', weight:8, opacity:.2 }).addTo(routeMap);
-  // Main line
   routePolyline = L.polyline(latlngs, {
-    color,
-    weight: 4,
-    opacity: 0.9,
-    dashArray: '10,6',
-    lineJoin: 'round'
+    color, weight: 4, opacity: 0.9, dashArray: '10,6', lineJoin: 'round'
   }).addTo(routeMap);
 
-  // Fit map to route
   routeMap.fitBounds(routePolyline.getBounds(), { padding:[40,40] });
 
-  // Show sequence strip
   const seq = document.getElementById('routeSequence');
   seq.innerHTML = optimal.map((p, i) => {
-    const label = p.id ? p.id : (i===0?'Depot':'Depot');
+    const label = p.id ? p.id : 'Depot';
     const isDepot = !p.id;
     return [
       `<span class="route-seq-item" style="background:${isDepot?'rgba(255,255,255,.1)':color+'22'};border-color:${isDepot?'var(--border)':color};color:${isDepot?'var(--muted)':color};font-weight:600">${isDepot?'🏠 Depot':label}</span>`,
@@ -367,25 +415,24 @@ function startRoute() {
     ].join('');
   }).join('');
 
-  document.getElementById('routeSeqStatus').textContent = `${areaBins.length} stops — optimised`;
+  document.getElementById('routeSeqStatus').textContent = `${driverBins.length} stops — optimised`;
 
-  // Status bar
   const bar = document.getElementById('routeStatusBar');
   bar.className = 'route-status-bar running';
   bar.querySelector('.truck-pulse').style.background = color;
   document.getElementById('routeStatusText').textContent = '🚛 Route started!';
 
-  // Animate truck
   animateTruck(optimal, color);
 
-  // Change button to Stop
   const btn = document.getElementById('startRouteBtn');
   btn.className  = 'btn-stop-route mt-16';
   btn.innerHTML  = '<i class="fas fa-stop"></i> Stop Route';
   btn.onclick    = stopRoute;
   routeRunning   = true;
 
-  showToast(`Area ${selectedArea} route started! ${areaBins.length} stops.`);
+  const drivers = AREA_DRIVERS[selectedArea] || [];
+  const dName = (drivers.find(d=>d.id===selectedDriver)||{}).name || 'Driver';
+  showToast(`${dName}'s route started! ${driverBins.length} stops.`);
 }
 
 function stopRoute() {
@@ -422,6 +469,7 @@ let bins = BHOPAL_BINS.map(b => ({
   location: b.name + ', Bhopal',
   fill: b.fill,
   status: 'Active',
+  area: b.area,
   updated: Math.floor(Math.random() * 15 + 1) + ' min ago'
 }));
 
@@ -433,22 +481,13 @@ let collections = [
   {id:'COL-005',route:'Route 2',driver:'Driver 2',status:'Completed',time:'Yesterday, 09:15 PM'},
 ];
 
-let routeData = {
-  1:{bins:['B-03','B-01','B-02','B-04'],dist:'4.2 km',time:'28 min',fuel:'20%'},
-  2:{bins:['B-07','B-05','B-06','B-08'],dist:'6.8 km',time:'35 min',fuel:'18%'},
-  3:{bins:['B-11','B-09','B-10','B-12'],dist:'8.1 km',time:'42 min',fuel:'25%'},
-};
-
-const alertsData = [
-  {bin:'B-03',fill:90,loc:'New Market, Bhopal',time:'3 min ago',type:'critical'},
-  {bin:'B-11',fill:92,loc:'Piplani Sector C, Bhopal',time:'5 min ago',type:'critical'},
-  {bin:'B-07',fill:88,loc:'Hoshangabad Road, Bhopal',time:'10 min ago',type:'critical'},
-  {bin:'B-01',fill:82,loc:'MP Nagar Zone 1, Bhopal',time:'15 min ago',type:'critical'},
-  {bin:'B-05',fill:71,loc:'Arera Colony E-5, Bhopal',time:'20 min ago',type:'warning'},
-  {bin:'B-09',fill:78,loc:'Govindpura Industrial, Bhopal',time:'25 min ago',type:'warning'},
-  {bin:'B-02',fill:65,loc:'DB Mall Area, Bhopal',time:'30 min ago',type:'warning'},
-  {bin:'COL-003',fill:0,loc:'Route A (Driver 1)',time:'35 min ago',type:'info',msg:'Collection COL-003 in progress'},
-];
+// Generate alerts dynamically from bin data
+const alertsData = BHOPAL_BINS.filter(b => b.fill >= 60).map(b => ({
+  bin: b.id, fill: b.fill, loc: b.name+', Bhopal',
+  time: Math.floor(Math.random()*40+1)+' min ago',
+  type: b.fill >= 80 ? 'critical' : 'warning',
+  area: b.area
+}));
 
 let currentBinIndex = -1;
 
@@ -569,7 +608,7 @@ navItems.forEach(nav => {
     if (target==='alerts')      renderAlerts('all');
     if (target==='users')       loadAppUsers();
     if (target==='reports')     renderReportsChart();
-    if (target==='routes')      { initRouteMap(); selectArea(selectedArea); routeMap.invalidateSize(); }
+    if (target==='routes')      { initRouteMap(); populateDriverSelector(); selectDriver(selectedDriver); routeMap.invalidateSize(); }
   });
 });
 
@@ -606,20 +645,22 @@ document.getElementById('editProfileBtn').addEventListener('click', () =>
 
 // ===== DASHBOARD =====
 function renderDashboard() {
-  const criticalBins = bins.filter(b=>b.fill>=60);
-  document.getElementById('statTotalBins').textContent       = bins.length;
+  const areaBins = bins.filter(b => b.area === selectedArea);
+  const criticalBins = areaBins.filter(b=>b.fill>=60);
+  document.getElementById('statTotalBins').textContent       = areaBins.length;
   document.getElementById('statActiveAlerts').textContent    = criticalBins.length;
   document.getElementById('statTotalCollections').textContent= collections.length;
-  const avg = Math.round(bins.reduce((s,b)=>s+b.fill,0)/bins.length);
+  const avg = areaBins.length ? Math.round(areaBins.reduce((s,b)=>s+b.fill,0)/areaBins.length) : 0;
   document.getElementById('statAvgFill').textContent = avg+'%';
   document.getElementById('alertBadge').textContent  = criticalBins.length;
 
   const grid = document.getElementById('dashboardBinGrid');
   grid.innerHTML = '';
-  bins.forEach((bin,i) => {
+  areaBins.forEach((bin) => {
+    const realIdx = bins.indexOf(bin);
     const c = getBinColor(bin.fill);
     grid.innerHTML += `
-      <div class="bin-mini-card" onclick="openBinDetails(${i})">
+      <div class="bin-mini-card" onclick="openBinDetails(${realIdx})">
         <div class="bin-mini-id">${bin.id}</div>
         <div class="bin-mini-fill ${c}-t">${bin.fill}%</div>
         <div class="mini-bar"><div class="mini-bar-fill ${c}" style="width:${bin.fill}%"></div></div>
@@ -669,8 +710,9 @@ document.getElementById('detailMarkCollected').addEventListener('click', () => {
 
 // ===== BINS TABLE =====
 function renderBinsTable(data) {
-  const d = data || bins;
-  document.getElementById('binsTableBody').innerHTML = d.map((bin,i) => {
+  const d = data || bins.filter(b => b.area === selectedArea);
+  document.getElementById('binsTableBody').innerHTML = d.map((bin) => {
+    const realIdx = bins.indexOf(bin);
     const c = getBinColor(bin.fill);
     return `<tr>
       <td><strong>${bin.id}</strong></td>
@@ -682,8 +724,8 @@ function renderBinsTable(data) {
       <td><span class="status-badge ${c}">${getBinLabel(bin.fill)}</span></td>
       <td style="color:var(--muted)">${bin.updated}</td>
       <td>
-        <button class="icon-btn" style="margin-right:6px" onclick="openBinDetails(${i})" title="View"><i class="fas fa-eye"></i></button>
-        <button class="icon-btn" onclick="editBin(${i})" title="Edit"><i class="fas fa-pen"></i></button>
+        <button class="icon-btn" style="margin-right:6px" onclick="openBinDetails(${realIdx})" title="View"><i class="fas fa-eye"></i></button>
+        <button class="icon-btn" onclick="editBin(${realIdx})" title="Edit"><i class="fas fa-pen"></i></button>
       </td>
     </tr>`;
   }).join('');
@@ -691,15 +733,16 @@ function renderBinsTable(data) {
 
 document.getElementById('binSearch').addEventListener('input', function() {
   const v = this.value.toLowerCase();
-  renderBinsTable(bins.filter(b=>b.id.toLowerCase().includes(v)||b.location.toLowerCase().includes(v)));
+  renderBinsTable(bins.filter(b=>b.area===selectedArea && (b.id.toLowerCase().includes(v)||b.location.toLowerCase().includes(v))));
 });
 document.getElementById('binStatusFilter').addEventListener('change', function() {
   const v = this.value;
-  if(v==='all') renderBinsTable();
-  else if(v==='critical') renderBinsTable(bins.filter(b=>b.fill>=80));
-  else if(v==='high') renderBinsTable(bins.filter(b=>b.fill>=60&&b.fill<80));
-  else if(v==='medium') renderBinsTable(bins.filter(b=>b.fill>=40&&b.fill<60));
-  else renderBinsTable(bins.filter(b=>b.fill<40));
+  const ab = bins.filter(b=>b.area===selectedArea);
+  if(v==='all') renderBinsTable(ab);
+  else if(v==='critical') renderBinsTable(ab.filter(b=>b.fill>=80));
+  else if(v==='high') renderBinsTable(ab.filter(b=>b.fill>=60&&b.fill<80));
+  else if(v==='medium') renderBinsTable(ab.filter(b=>b.fill>=40&&b.fill<60));
+  else renderBinsTable(ab.filter(b=>b.fill<40));
 });
 
 document.getElementById('openAddBinBtn').addEventListener('click', () => {
@@ -765,13 +808,14 @@ document.getElementById('startRouteBtn').addEventListener('click', startRoute);
 // ===== ALERTS =====
 function renderAlerts(filter) {
   const container = document.getElementById('alertsList');
-  let data = filter==='all' ? alertsData : alertsData.filter(a=>a.type===filter);
+  let data = alertsData.filter(a => a.area === selectedArea);
+  if (filter !== 'all') data = data.filter(a=>a.type===filter);
   if (!data.length) { container.innerHTML='<p style="color:var(--muted);padding:20px;text-align:center">No alerts found.</p>'; return; }
   container.innerHTML = data.map(a => {
-    const c  = a.type==='critical'?'red':a.type==='warning'?'yellow':'blue';
-    const ic = a.type==='critical'?'fa-fire':a.type==='warning'?'fa-exclamation-triangle':'fa-info-circle';
-    const msg = a.msg || (a.bin+' is '+a.fill+'% full');
-    return `<div class="alert-item ${a.type==='warning'?'warning':a.type==='info'?'info':''}">
+    const c  = a.type==='critical'?'red':'yellow';
+    const ic = a.type==='critical'?'fa-fire':'fa-exclamation-triangle';
+    const msg = a.bin+' is '+a.fill+'% full';
+    return `<div class="alert-item ${a.type==='warning'?'warning':''}">
       <div class="alert-dot ${c}"><i class="fas ${ic}"></i></div>
       <div class="alert-content"><strong>${msg}</strong><p>${a.loc}</p></div>
       <span class="alert-time">${a.time}</span>
