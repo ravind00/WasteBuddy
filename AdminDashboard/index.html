@@ -11,6 +11,8 @@
     rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <link rel="stylesheet" href="style.css">
 </head>
 
@@ -264,14 +266,7 @@
               <h3>Recommended Route</h3>
               <span class="driver-badge" id="routeDriverLabel">Driver 1</span>
             </div>
-            <div class="map-canvas" id="routeMapCanvas">
-              <div class="map-node" id="node1" style="top:30%;left:8%">1</div>
-              <div class="map-node" id="node2" style="top:60%;left:25%">2</div>
-              <div class="map-node" id="node3" style="top:20%;left:50%">3</div>
-              <div class="map-node active-node" id="node4" style="top:55%;left:70%">4</div>
-              <div class="map-node truck-node" id="nodeTruck" style="top:70%;left:88%"><i class="fas fa-truck"></i>
-              </div>
-            </div>
+            <div id="routeMap" class="route-map-container"></div>
             <div class="route-sequence" id="routeSequence"></div>
             <div class="route-stats">
               <div class="route-stat">

@@ -74,7 +74,11 @@ navItems.forEach(nav=>{
     if(target==='alerts') renderAlerts('all');
     if(target==='users') renderUsersTable(users);
     if(target==='reports') renderReportsChart();
-    if(target==='routes') renderRoute(1);
+    if(target==='routes') {
+      renderRoute(1);
+      // Leaflet needs the container visible to compute size
+      setTimeout(() => { if(routeMap) routeMap.invalidateSize(); }, 200);
+    }
   });
 });
 
@@ -331,23 +335,278 @@ document.getElementById('openNewCollectionBtn').addEventListener('click',()=>{
   showToast('New collection created!');
 });
 
-// ===== ROUTES =====
-function renderRoute(driverNum){
-  const data = routeData[driverNum];
-  document.getElementById('routeDriverLabel').textContent = 'Driver '+driverNum;
-  document.getElementById('routeDist').textContent = data.dist;
-  document.getElementById('routeTime').textContent = data.time;
-  document.getElementById('routeFuel').textContent = data.fuel;
-  const seq = document.getElementById('routeSequence');
-  seq.innerHTML = data.bins.map((b,i)=>
-    `<span class="route-seq-item">${b}</span>${i<data.bins.length-1?'<span class="route-seq-arrow">→</span>':''}`
-  ).join('');
+// ===== ROUTES — LEAFLET MAP + OSRM STREET ROUTING =====
+
+// Real GPS coordinates for bins in Indore, India
+const binCoordinates = {
+  'Bin 1':  [22.7196, 75.8577],  // MG Road
+  'Bin 2':  [22.7230, 75.8620],  // MG Road area
+  'Bin 3':  [22.7255, 75.8720],  // Palasia
+  'Bin 4':  [22.7530, 75.8930],  // Vijay Nagar
+  'Bin 5':  [22.7280, 75.8680],  // Palasia area
+  'Bin 6':  [22.7155, 75.8480],  // Bhawerkua
+  'Bin 7':  [22.7310, 75.8560],  // Sapna Sangeeta
+  'Bin 8':  [22.7180, 75.8750],  // South Tukoganj
+  'Bin 9':  [22.7350, 75.8650],  // Geeta Bhawan
+  'Bin 10': [22.7480, 75.8850],  // Scheme No 54
+  'Bin 11': [22.7400, 75.8780],  // AB Road area
+  'Bin 12': [22.7450, 75.8700],  // Bhanwar Kuwa
+};
+
+let routeMap = null;
+let routeLayerGroup = null;
+let truckMarker = null;
+let routeAnimationId = null;
+let currentRouteCoords = [];
+let isRouteRunning = false;
+
+// Initialize Leaflet map
+function initRouteMap() {
+  if (routeMap) return; // already initialized
+
+  routeMap = L.map('routeMap', {
+    center: [22.7296, 75.8643], // Indore center
+    zoom: 14,
+    zoomControl: true,
+    attributionControl: true,
+  });
+
+  // Dark-themed tile layer to match the dashboard aesthetic
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+    subdomains: 'abcd',
+    maxZoom: 19,
+  }).addTo(routeMap);
+
+  routeLayerGroup = L.layerGroup().addTo(routeMap);
 }
-document.getElementById('driverSelect').addEventListener('change',function(){
+
+// Create a custom numbered bin marker
+function createBinMarkerIcon(number, total) {
+  let extraClass = '';
+  if (number === 1) extraClass = ' bin-start';
+  else if (number === total) extraClass = ' bin-end';
+
+  return L.divIcon({
+    className: '',
+    html: `<div class="bin-marker-icon${extraClass}">${number}</div>`,
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
+    popupAnchor: [0, -20],
+  });
+}
+
+// Create truck marker icon
+function createTruckMarkerIcon() {
+  return L.divIcon({
+    className: '',
+    html: `<div class="truck-marker-icon"><i class="fas fa-truck"></i></div>`,
+    iconSize: [36, 36],
+    iconAnchor: [18, 18],
+  });
+}
+
+// Fetch street-level route from OSRM
+async function fetchOSRMRoute(waypoints) {
+  // Build the OSRM URL: lng,lat pairs separated by semicolons
+  const coords = waypoints.map(wp => `${wp[1]},${wp[0]}`).join(';');
+  const url = `https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson&steps=true`;
+
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+      const route = data.routes[0];
+      // OSRM returns [lng, lat], Leaflet needs [lat, lng]
+      const routeCoords = route.geometry.coordinates.map(c => [c[1], c[0]]);
+      const distanceKm = (route.distance / 1000).toFixed(1);
+      const durationMin = Math.round(route.duration / 60);
+      return { coords: routeCoords, distance: distanceKm, duration: durationMin };
+    }
+  } catch (err) {
+    console.warn('OSRM routing failed, falling back to straight lines:', err);
+  }
+
+  // Fallback: straight lines between waypoints
+  return { coords: waypoints, distance: null, duration: null };
+}
+
+// Draw the route on the map
+async function renderRoute(driverNum) {
+  const data = routeData[driverNum];
+  document.getElementById('routeDriverLabel').textContent = 'Driver ' + driverNum;
+
+  // Update sequence display
+  const seq = document.getElementById('routeSequence');
+  seq.innerHTML = data.bins.map((b, i) =>
+    `<span class="route-seq-item">${b}</span>${i < data.bins.length - 1 ? '<span class="route-seq-arrow">→</span>' : ''}`
+  ).join('');
+
+  // Stop any running animation
+  stopRouteAnimation();
+
+  // Initialize map if needed
+  initRouteMap();
+
+  // Clear previous layers
+  routeLayerGroup.clearLayers();
+  if (truckMarker) {
+    routeMap.removeLayer(truckMarker);
+    truckMarker = null;
+  }
+
+  // Get waypoints for this route's bins
+  const waypoints = data.bins
+    .map(binId => binCoordinates[binId])
+    .filter(coord => coord !== undefined);
+
+  if (waypoints.length < 2) {
+    showToast('Not enough bin coordinates for this route', 'red');
+    return;
+  }
+
+  // Add bin markers
+  data.bins.forEach((binId, index) => {
+    const coord = binCoordinates[binId];
+    if (!coord) return;
+
+    const marker = L.marker(coord, {
+      icon: createBinMarkerIcon(index + 1, data.bins.length),
+    }).addTo(routeLayerGroup);
+
+    // Find bin data for popup
+    const binInfo = bins.find(b => b.id === binId);
+    const fillInfo = binInfo ? `<br>Fill Level: <strong style="color:${binInfo.fill >= 80 ? '#ef4444' : binInfo.fill >= 60 ? '#f59e0b' : '#22c55e'}">${binInfo.fill}%</strong><br>Location: ${binInfo.location}` : '';
+    marker.bindPopup(`<strong>${binId}</strong><br>Stop #${index + 1}${fillInfo}`);
+  });
+
+  // Fetch real street route from OSRM
+  const routeResult = await fetchOSRMRoute(waypoints);
+  currentRouteCoords = routeResult.coords;
+
+  // Update stats with real OSRM data (or keep existing)
+  if (routeResult.distance) {
+    document.getElementById('routeDist').textContent = routeResult.distance + ' km';
+    data.dist = routeResult.distance + ' km';
+  } else {
+    document.getElementById('routeDist').textContent = data.dist;
+  }
+  if (routeResult.duration) {
+    document.getElementById('routeTime').textContent = routeResult.duration + ' min';
+    data.time = routeResult.duration + ' min';
+  } else {
+    document.getElementById('routeTime').textContent = data.time;
+  }
+  document.getElementById('routeFuel').textContent = data.fuel;
+
+  // Draw the route polyline (gradient-style with shadow)
+  const shadowLine = L.polyline(currentRouteCoords, {
+    color: '#000',
+    weight: 8,
+    opacity: 0.3,
+  }).addTo(routeLayerGroup);
+
+  const routeLine = L.polyline(currentRouteCoords, {
+    color: '#22c55e',
+    weight: 4,
+    opacity: 0.9,
+    lineCap: 'round',
+    lineJoin: 'round',
+    dashArray: null,
+  }).addTo(routeLayerGroup);
+
+  // Fit map to show entire route
+  const bounds = L.latLngBounds(waypoints);
+  routeMap.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 });
+
+  // Reset button state
+  const btn = document.getElementById('startRouteBtn');
+  btn.innerHTML = '<i class="fas fa-play"></i> Start Route';
+  btn.classList.remove('btn-route-active');
+  isRouteRunning = false;
+}
+
+// Animate truck along the route
+function startRouteAnimation() {
+  if (!currentRouteCoords || currentRouteCoords.length < 2) return;
+
+  isRouteRunning = true;
+  const btn = document.getElementById('startRouteBtn');
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Route In Progress...';
+  btn.classList.add('btn-route-active');
+
+  // Place truck at the start
+  if (truckMarker) routeMap.removeLayer(truckMarker);
+  truckMarker = L.marker(currentRouteCoords[0], {
+    icon: createTruckMarkerIcon(),
+    zIndexOffset: 1000,
+  }).addTo(routeMap);
+
+  // Draw a progress trail
+  const trailCoords = [currentRouteCoords[0]];
+  const trailLine = L.polyline(trailCoords, {
+    color: '#f97316',
+    weight: 4,
+    opacity: 0.8,
+    dashArray: '8, 12',
+  }).addTo(routeLayerGroup);
+
+  let pointIndex = 0;
+  const totalPoints = currentRouteCoords.length;
+  // Adjust speed: move through ~3-5 points per frame for smooth animation
+  const pointsPerFrame = Math.max(1, Math.floor(totalPoints / 300));
+
+  function animateStep() {
+    if (pointIndex >= totalPoints - 1) {
+      // Animation complete
+      isRouteRunning = false;
+      btn.innerHTML = '<i class="fas fa-check"></i> Route Completed!';
+      btn.classList.remove('btn-route-active');
+      btn.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+      showToast('Route completed successfully! All bins collected. 🎉');
+
+      // Reset button after 3 seconds
+      setTimeout(() => {
+        btn.innerHTML = '<i class="fas fa-play"></i> Start Route';
+        btn.classList.remove('btn-route-active');
+        btn.style.background = '';
+      }, 3000);
+      return;
+    }
+
+    pointIndex = Math.min(pointIndex + pointsPerFrame, totalPoints - 1);
+    const pos = currentRouteCoords[pointIndex];
+
+    truckMarker.setLatLng(pos);
+    trailCoords.push(pos);
+    trailLine.setLatLngs(trailCoords);
+
+    // Keep the truck in view
+    if (!routeMap.getBounds().contains(pos)) {
+      routeMap.panTo(pos, { animate: true, duration: 0.3 });
+    }
+
+    routeAnimationId = requestAnimationFrame(animateStep);
+  }
+
+  routeAnimationId = requestAnimationFrame(animateStep);
+}
+
+function stopRouteAnimation() {
+  if (routeAnimationId) {
+    cancelAnimationFrame(routeAnimationId);
+    routeAnimationId = null;
+  }
+  isRouteRunning = false;
+}
+
+document.getElementById('driverSelect').addEventListener('change', function () {
   renderRoute(parseInt(this.value));
 });
-document.getElementById('startRouteBtn').addEventListener('click',()=>{
-  showToast('Route started for '+document.getElementById('routeDriverLabel').textContent+'!');
+document.getElementById('startRouteBtn').addEventListener('click', () => {
+  if (isRouteRunning) return;
+  startRouteAnimation();
+  showToast('Route started for ' + document.getElementById('routeDriverLabel').textContent + '!');
 });
 
 // ===== ALERTS =====
